@@ -458,6 +458,21 @@ nextjs-portal,
   100% { background-position: 200% 0; }
 }
 
+@keyframes indeterminateSlide {
+  0% {
+    left: -40%;
+    width: 30%;
+  }
+  50% {
+    left: 40%;
+    width: 60%;
+  }
+  100% {
+    left: 100%;
+    width: 30%;
+  }
+}
+
 @keyframes floatEmblem {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-4px); }

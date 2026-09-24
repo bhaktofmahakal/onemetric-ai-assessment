@@ -18,16 +18,18 @@ Live Production URL: **[https://onemetric-ai-assessment.vercel.app](https://onem
    - [Deterministic Finite State Machine (FSM) Order of Precedence](#3-deterministic-finite-state-machine-fsm-order-of-precedence)
    - [Buying Committee Multi-Stakeholder Resolution](#4-buying-committee-multi-stakeholder-resolution)
 4. [Autonomous Dual-Speed AI Agent Runtime](#autonomous-dual-speed-ai-agent-runtime)
-   - [TypeSafe System One Next-Tool Selection](#typesafe-system-one-next-tool-selection)
+   - [TypeSafe Jev (System One) Next-Tool Selection](#typesafe-jev-system-one-next-tool-selection)
    - [Gemini Structured Fallback Planner](#gemini-structured-fallback-planner)
    - [Closed Tool Contract & CRM Idempotency](#closed-tool-contract--crm-idempotency)
 5. [Downstream Learning & Continuous Feedback Loop](#downstream-learning--continuous-feedback-loop)
-6. [Interactive User Guide: How to Use the Platform](#interactive-user-guide-how-to-use-the-platform)
-   - [1. Running Intent Simulation Scenarios](#step-1-running-intent-simulation-scenarios)
-   - [2. Live Domain Buying Committee Evaluation](#step-2-live-domain-buying-committee-evaluation)
-   - [3. Fast-Forwarding the 48h Hysteresis Cooldown](#step-3-fast-forwarding-the-48h-hysteresis-cooldown)
-   - [4. Simulating Downstream Conversion Feedback](#step-4-simulating-downstream-conversion-feedback)
-   - [5. Deep Analytical & Payload Inspection Tabs](#step-5-deep-analytical--payload-inspection-tabs)
+6. [Platform Walkthrough: Validating Real-World RevOps Decisions](#platform-walkthrough-validating-real-world-revops-decisions)
+   - [1. Distinguishing Meaningful Shifts from Flapping Noise](#1-distinguishing-meaningful-shifts-from-flapping-noise-scenarios-1--2)
+   - [2. Multi-Stakeholder Buying Committee Decomposition](#2-multi-stakeholder-buying-committee-decomposition-step-2)
+   - [3. Persona Relevance Filtering](#3-persona-relevance-filtering-scenario-3)
+   - [4. Active Deal Escalation & Cross-BU Ownership](#4-active-deal-escalation--cross-bu-ownership-scenario-4)
+   - [5. Temporal Cooldown Re-Evaluation via Virtual Cron](#5-temporal-cooldown-re-evaluation-via-virtual-cron-step-3)
+   - [6. Closed-Loop Learning & Dynamic Bayesian Recalibration](#6-closed-loop-learning--dynamic-bayesian-recalibration-step-4)
+   - [7. Deep Analytical Inspection Panels](#7-deep-analytical-inspection-panels)
 7. [Integration Boundaries, Safeguards & Limitations](#integration-boundaries-safeguards--limitations)
 8. [Local Development & Verification Commands](#local-development--verification-commands)
 
@@ -47,78 +49,13 @@ When a prospect actively engaged in Product B suddenly registers third-party int
 **OneMetric resolves this with a three-layer architecture:**
 1. **Mathematical Scoring Layer (`scoring.ts`)**: Time-decayed half-life weighting with dampening for passive visits and a multi-source corroboration requirement.
 2. **Deterministic Governance Layer (`fsm.ts` & `multi-contact-evaluator.ts`)**: Finite state machine with strict precedence guards (fatigue limits, active deal escalation, persona relevance, cross-BU ownership, and a 48-hour hysteresis window).
-3. **Autonomous Bounded Agent Runtime (`agent-runtime.ts`)**: Dual-speed planner leveraging **TypeSafe System One** for fast typed tool choices, with an automatic fallback to **Google Gemini** structured schema planning, executing idempotent CRM writes.
+3. **Autonomous Bounded Agent Runtime (`agent-runtime.ts`)**: Dual-speed planner leveraging **TypeSafe Jev (System One)** for fast typed tool choices, with an automatic fallback to **Google Gemini** structured schema planning, executing idempotent CRM writes.
 
 ---
 
 ## End-to-End System Architecture (HLD)
 
 ![High-Level Design Architecture](diagrams/hld-architecture.svg)
-
-```mermaid
-flowchart TD
-    subgraph SignalSources["1. INBOUND INTENT & CONVERSION SIGNALS"]
-        Bombora["Bombora Surge (3rd-Party)"]
-        G2["G2 Pricing & Review (2nd-Party)"]
-        Direct["Direct Web & Demo (1st-Party)"]
-        Downstream["Downstream Outcomes (Meeting / Win / Loss)"]
-    end
-
-    subgraph IngestionGate["2. INGESTION & SECURITY GATEWAY"]
-        Webhook["POST /api/engine/webhook"]
-        HMAC["Raw-Body HMAC-SHA256 Verification"]
-        RedisDedupe["Redis Deduplication (90-Day Key Claims)"]
-        RedisLock["Distributed Account Lock (SET NX EX)"]
-    end
-
-    subgraph StateAndMemory["3. DURABLE STATE & CRM RECONCILIATION"]
-        HubSpotRead["HubSpot CRM REST API v3<br/>(Contacts, Company, Active Deals)"]
-        RedisStore["Upstash Redis HTTPS Store<br/>(Recent 200 Events, Contact FSM States, Weights)"]
-    end
-
-    subgraph DecisionEngine["4. DETERMINISTIC REVOPS EVALUATION"]
-        Decay["Time-Decayed Scoring (Half-Life: 14 Days)"]
-        DualGate["Hysteresis Dual-Gate (Δ >= 25 & Floor >= 50)"]
-        FSM["Deterministic FSM Guard Evaluation"]
-        Committee["Multi-Contact Buying Committee Matcher"]
-    end
-
-    subgraph AgentRuntime["5. AUTONOMOUS DUAL-SPEED AI PLANNER"]
-        TypeSafe["TypeSafe System One (jev-latest)<br/>Choice: next_tool"]
-        GeminiFallback["Gemini Structured Fallback<br/>(Strict JSON Schema + Confidence Floor)"]
-        ToolExecutor["Agent Runtime Execution Loop"]
-    end
-
-    subgraph DownstreamExecution["6. CRM WRITES & SALES ORCHESTRATION"]
-        HubSpotBatch["HubSpot Batch Contact PATCH<br/>(/crm/v3/objects/contacts/batch/update)"]
-        AETask["Consolidated AE Briefing Task<br/>(/crm/v3/objects/tasks)"]
-        Briefing["Strategic Sales Memo Synthesis"]
-        Learner["Bayesian & Heuristic Source Weight Recalibration"]
-    end
-
-    Bombora --> Webhook
-    G2 --> Webhook
-    Direct --> Webhook
-    Downstream --> Webhook
-
-    Webhook --> HMAC --> RedisDedupe --> RedisLock
-    RedisLock --> HubSpotRead
-    RedisLock --> RedisStore
-
-    HubSpotRead --> Decay
-    RedisStore --> Decay
-    Decay --> DualGate --> FSM --> Committee
-
-    Committee --> TypeSafe
-    TypeSafe -.->|API Failure or Unconfigured| GeminiFallback
-    TypeSafe --> ToolExecutor
-    GeminiFallback --> ToolExecutor
-
-    ToolExecutor --> HubSpotBatch
-    ToolExecutor --> AETask
-    ToolExecutor --> Briefing
-    Downstream --> Learner --> RedisStore
-```
 
 ---
 
@@ -225,13 +162,13 @@ The agent runtime (`src/engine/agent-runtime.ts`) follows a bounded, determinist
 4. Executes the chosen tool against CRM REST endpoints.
 5. Loops until the terminal `complete` tool is selected or human escalation occurs.
 
-### TypeSafe System One Next-Tool Selection
+### TypeSafe Jev (System One) Next-Tool Selection
 - Calls `POST https://api.typesafe.ai/v1/systemone` using model `jev-latest`.
 - Supplies available tools as an enumerated `Choice` question with strict transition criteria.
 - Validates returned confidence; if confidence falls below `0.65`, human review is triggered automatically.
 
 ### Gemini Structured Fallback Planner
-If TypeSafe is unconfigured, times out, or encounters rate limits (HTTP 429/503), the engine seamlessly hands off execution to **Google Gemini** (`src/engine/gemini-agent.ts`):
+If TypeSafe Jev is unconfigured, times out, or encounters rate limits (HTTP 429/503), the engine seamlessly hands off execution to **Google Gemini** (`src/engine/gemini-agent.ts`):
 - Uses strict JSON schema enforcement:
   ```json
   {
@@ -276,7 +213,7 @@ All weights are bounded within `[0.10, 1.00]` and immediately affect future scor
 
 ---
 
-## Interactive User Guide: How to Use the Platform
+## Platform Walkthrough: Validating Real-World RevOps Decisions
 
 The interactive dashboard at **[https://onemetric-ai-assessment.vercel.app](https://onemetric-ai-assessment.vercel.app)** allows full observability and testing of all decision engine mechanics.
 
@@ -284,7 +221,7 @@ The interactive dashboard at **[https://onemetric-ai-assessment.vercel.app](http
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
 │                                 ONEMETRIC REVOPS ENGINE                                 │
 ├─────────────────────────────────────────────────────────────────────────────────────────┤
-│ [Header] Reset Engine | Guide | Engine Status (TypeSafe + Gemini Fallback) | Latency   │
+│ [Header] Reset Engine | Guide | Engine Status (TypeSafe Jev + Gemini Fallback) | Latency │
 ├─────────────────────────────────────────────────────────────────────────────────────────┤
 │ [Top Evaluator Bar]                                                                     │
 │  Domain Input: [ techcorp.com ]  [ Evaluate Committee ]                                │
@@ -302,46 +239,60 @@ The interactive dashboard at **[https://onemetric-ai-assessment.vercel.app](http
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Step 1: Running Intent Simulation Scenarios
-Located in the right column of the upper grid:
-1. **Scenario 1 (Uncorroborated Surge)**:
-   - Click to test the Zero-Baseline Trap.
-   - *Result*: Competing score rises to 35, relative gap is 35, but absolute floor (< 50) holds campaign in `ACTIVE_CURRENT`.
-2. **Scenario 2 (Corroborated Buying Intent)**:
-   - Click to test multi-touch corroborated intent.
-   - *Result*: Signal passes dual-gate; FSM enters `EVALUATION_COOLDOWN` (48-hour hold).
-3. **Scenario 3 (Cross-Department Inquiry / Persona Mismatch)**:
-   - Click to test a Finance ERP surge on an Engineering leader.
-   - *Result*: Blocked by **Buyer Persona Guard**; prevents embarrassing irrelevant outreach.
-4. **Scenario 4 (Enterprise Multi-Product Deal Conflict)**:
-   - Click to test enterprise conflict on a $120K open pipeline deal.
-   - *Result*: Automated switching halted; status transitions to `ESCALATED`; activates Sales Executive Briefing tab.
+### 1. Distinguishing Meaningful Shifts from Flapping Noise (Scenarios 1 & 2)
 
-### Step 2: Live Domain Buying Committee Evaluation
-In the top bar, enter any domain (or click one of the quick buttons: `Evaluate techcorp.com`, `Evaluate snowflake.com`, `Evaluate stripe.com`):
-- The button activates an immediate **running shimmer and spinner**.
-- Evaluates all committee stakeholders concurrently against HubSpot schema.
-- Switches the deep inspector to the **Buying Committee Resolution** tab, rendering individual contact cards and consolidated AE task outputs.
+A primary failure mode in third-party intent automation (e.g. Bombora topic surges) is **the Zero-Baseline Trap**: if an account has zero active intent for Product A, a single uncorroborated event can produce an artificial relative gap ($\Delta = 35 - 0 = 35$), which naive thresholding would mistakenly interpret as a major buying surge.
 
-### Step 3: Fast-Forwarding the 48h Hysteresis Cooldown
-When an account enters `EVALUATION_COOLDOWN`:
-- Click **Advance 48h Cooldown (Cron)** in the top bar or inside the Scenario panel.
-- The button shows `Advancing 48h...` with spinning activity.
-- The engine re-evaluates decayed signals: persistent signals graduate to `SWITCHING` or `ESCALATED`, while transient noise reverts to `ACTIVE_CURRENT`.
+- **Scenario 1: Uncorroborated Surge (Zero-Baseline Trap)**:
+  - *Context*: A prospect in Product B (`DataFlow`) registers an isolated Bombora surge for Product A (`CloudSecure`). No first-party or second-party corroboration exists.
+  - *Mathematical Check*: The single-source cap restricts the raw score to $35$ points. While the relative delta requirement ($\Delta \ge 25$) is satisfied, the **Absolute Floor Guard** ($\text{Score} \ge 50$) safely rejects the shift.
+  - *Engine Verdict*: FSM holds the contact in `ACTIVE_CURRENT`. Automation continues Product B nurturing without disruptive flapping.
 
-### Step 4: Simulating Downstream Conversion Feedback
-In the **Source Weight Snapshot & Outcome Ingestion** section:
-- Click **+ Meeting Booked (+0.08)** or **+ Email Reply (+0.05)**.
-- Button displays an animated spinner with `Recalibrating (+0.08)...` and a glowing shimmer.
-- The 3rd-Party Intent (Bombora) weight indicator updates dynamically (e.g. from `0.50` to `0.58`).
-- A confirmation banner details the exact Bayesian weight adjustment.
+- **Scenario 2: Corroborated Buying Intent with 48h Cooldown Hold**:
+  - *Context*: The account registers multi-touch corroboration across high-intent channels (direct documentation visits + G2 competitive comparison + Bombora surge for Product A).
+  - *Mathematical Check*: Combined decayed score reaches $100$, surpassing both the delta requirement ($\Delta = 65 \ge 25$) and the absolute floor ($100 \ge 50$).
+  - *Engine Verdict*: Rather than abruptly switching campaigns mid-sequence, the FSM transitions to `EVALUATION_COOLDOWN` (48-hour hold). This prevents erratic messaging, protects ongoing campaign cadence, and queues the account for temporal re-verification.
 
-### Step 5: Deep Analytical & Payload Inspection Tabs
-- **Decision & Guard Analysis**: Full mathematical breakdown of relative delta, absolute floor, fatigue counters, and raw FSM guard checks.
-- **Buying Committee Resolution**: Live view of all evaluated stakeholders, assigned actions, and digital footprint corroboration.
-- **Sales Executive Briefing**: AI-generated strategic memo containing commercial risk assessments, cross-BU positioning strategies, and AE discovery checklists.
-- **HubSpot CRM Sync Payloads**: Complete, syntax-highlighted, copyable REST API v3 payloads for Contact PATCH, Batch Updates, and Task Creation.
-- **System Audit Ledger**: Immutable chronological ledger tracking event IDs, decisions, state transitions, and sub-millisecond execution latencies.
+### 2. Multi-Stakeholder Buying Committee Decomposition (Step 2)
+
+Intent data is collected at the domain level (e.g. `techcorp.com`), but campaign journeys and cold outreach execute on individual human contacts. Blindly switching all domain contacts to a new product creates catastrophic messaging mismatch.
+
+- *Decomposition Logic*: When evaluating an account committee (e.g. `techcorp.com`, `snowflake.com`, `stripe.com`), the engine parses all CRM contacts and maps incoming product surges strictly to their operational buyer personas:
+  - **VP Engineering / SecOps**: Mapped to `CloudSecure` (Product A) — relevant to infrastructure security.
+  - **Head of Data / Chief Architect**: Mapped to `DataFlow` (Product B) — relevant to streaming pipelines.
+  - **VP Finance / CFO**: Mapped to `FinanceOS` (Product C) — relevant to ERP and billing.
+- *Consolidated AE Orchestration*: If multiple committee members express conflicting or simultaneous interest across business units, the engine creates **exactly one consolidated AE briefing task** in HubSpot, linking all involved contacts, rather than firing multiple competing outreach cadences.
+
+### 3. Persona Relevance Filtering (Scenario 3)
+
+- *Context*: Third-party intent surges on FinanceOS (Product C), but the evaluated contact is an Engineering Director currently enrolled in DataFlow (Product B).
+- *Engine Verdict*: The **Buyer Persona Guard** intervenes. While domain-level intent for Product C is legitimate ($92.28$), enrolling an engineering buyer in financial software messaging would severely damage brand trust. The contact remains in `ACTIVE_CURRENT`, and the engine flags a recommendation to source an appropriate finance buyer persona in CRM.
+
+### 4. Active Deal Escalation & Cross-BU Ownership (Scenario 4)
+
+- *Context*: A Tier-1 enterprise account exhibits a surge in Product A, but CRM reconciliation discovers an active pipeline deal ($120,000, Stage: *Demo Scheduled*) owned by an assigned Account Executive.
+- *Engine Verdict*: Deterministic FSM guard `ACTIVE_DEAL_CHECK` immediately takes precedence over marketing automation. Automated campaign switching is frozen, status moves to `ESCALATED`, and an automated **Sales Executive Briefing Memo** is synthesized via Gemini, providing the AE with commercial risk assessments, talking points, and discovery questions before customer calls.
+
+### 5. Temporal Cooldown Re-Evaluation via Virtual Cron (Step 3)
+
+The 48-hour cooldown is not a static delay; it is an active noise filter:
+- *Virtual Cron Execution (`/api/engine/cron/evaluate-cooldowns`)*: In production, daily Vercel cron triggers recheck workers. In the dashboard, clicking **Advance 48h Cooldown (Cron)** simulates the 48-hour temporal progression using an injected virtual clock.
+- *Decay Dynamics*: Continuous exponential decay ($t_{1/2} = 14$ days) re-evaluates signals. Persistent signals (backed by ongoing engagement) pass re-verification and graduate to `SWITCHING` (same BU) or `ESCALATED` (cross BU). Transient noise naturally decays below the 50-point floor and cleanly reverts the prospect to `ACTIVE_CURRENT`.
+
+### 6. Closed-Loop Learning & Dynamic Bayesian Recalibration (Step 4)
+
+The platform does not treat third-party data providers as infallible. Inbound intent sources are continuously calibrated against downstream conversion outcomes:
+- *Ingestion Endpoint*: Secure server-to-server webhook (`POST /api/engine/feedback`) receives signed outcomes (`meeting_booked`, `email_reply`, `deal_won`, `deal_lost`, `unsubscribed`).
+- *Weight Updating*: Applies bounded adjustments to provider reliability weights in durable Redis memory (e.g. Bombora intent weight adjusts from $0.50 \to 0.58$ upon meeting booking, or drops upon unsubscription).
+- *System Impact*: Accounts from that provider in the future require either higher corroboration or lower barriers depending on historical predictive accuracy.
+
+### 7. Deep Analytical Inspection Panels
+
+- **Decision & Guard Analysis**: Step-by-step mathematical breakdown of exponential decay, same-day passive dampening, dual-gate hysteresis, and individual FSM guard pass/fail conditions.
+- **Buying Committee Resolution**: Role-by-role stakeholder grid showing assigned actions, persona mappings, and external digital footprint corroboration.
+- **Sales Executive Briefing**: Strategic memo synthesized for sales reps, containing deal risk assessment, cross-BU positioning strategies, and actionable qualification questions.
+- **HubSpot CRM Sync Payloads**: Copyable, syntax-highlighted REST API v3 payloads for Contact PATCH, Batch Updates, and Task Creation with HMAC idempotency headers.
+- **System Audit Ledger**: Immutable chronological execution log capturing raw webhook IDs, transition decisions, planner selection, and sub-millisecond execution latencies.
 
 ---
 
@@ -353,7 +304,7 @@ In the **Source Weight Snapshot & Outcome Ingestion** section:
 | **HubSpot Tasks API** | Live REST v3 creation | Creates exactly one consolidated AE briefing task per account escalation; eliminates duplicate rep spam. |
 | **HubSpot Sequences API** | Evaluated (UI-only scope) | Sequences API requires user-level OAuth seats. The engine marks campaigns in CRM but delegates automated sending to verified workflows. |
 | **Upstash Redis Storage** | Live HTTPS REST | 90-day deduplication claims, distributed lock serialization (`SET NX EX`), and persistent event history. |
-| **TypeSafe System One** | Live REST API | Evaluated against `jev-latest`. Automated fallback to Gemini on timeout, rate limit, or failure. |
+| **TypeSafe Jev (System One)** | Live REST API | Evaluated against model `jev-latest`. Automated fallback to Gemini on timeout, rate limit, or failure. |
 | **Google Gemini API** | Live REST API | Structured JSON schema output fallback with 0.65 confidence safety threshold. |
 
 ---

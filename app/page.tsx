@@ -501,7 +501,7 @@ export default function Home() {
               ✓ Bounded webhook agent loop (separate signed endpoint)
             </span>
             <span className="pill pill-active font-mono" style={{ fontSize: '0.625rem' }}>
-              ✓ Deterministic FSM + optional TypeSafe decisions
+              ✓ Deterministic FSM + optional TypeSafe Jev decisions
             </span>
           </div>
 
