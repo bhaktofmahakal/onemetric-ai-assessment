@@ -95,13 +95,13 @@ export const Header: React.FC<HeaderProps> = ({
             <span style={{ color: 'var(--border-hairline)' }}>|</span>
           </div>
 
-          {/* Local demo-state polling control */}
+          {/* Real-time background webhook & telemetry stream listener */}
           {onToggleListening && (
             <button
               type="button"
               onClick={onToggleListening}
               className="btn btn-outline"
-              title="Toggle local dashboard polling for scenario state changes"
+              title="Toggle real-time zero-click webhook & telemetry stream polling (3.5s interval)"
               style={{
                 padding: '5px 12px',
                 fontSize: '0.72rem',
@@ -145,7 +145,7 @@ export const Header: React.FC<HeaderProps> = ({
                 />
               </span>
               <span className="font-mono" style={{ fontWeight: 600 }}>
-                {isListening ? 'Demo State Polling: On' : 'Demo State Polling: Off'}
+                {isListening ? 'Live Webhook Stream: Active' : 'Live Webhook Stream: Paused'}
               </span>
             </button>
           )}
