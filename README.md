@@ -105,38 +105,6 @@ The FSM (`src/engine/fsm.ts`) is authoritative. Machine learning models and LLM 
 
 ![FSM State Transitions & Guard Hierarchy](diagrams/fsm-transitions.svg)
 
-```mermaid
-flowchart TD
-    Start([Inbound Signal Evaluated]) --> GuardExit{1. Terminal EXITED or Unsubscribe?}
-    GuardExit -- Yes --> StateExited[State: EXITED<br/>Action: Suppress All Outbound]
-    GuardExit -- No --> GuardConflict{2. Multi-Product Conflict?<br/>Scores >= 70 on 2+ BUs}
-    
-    GuardConflict -- Yes --> StateEscalateConflict[State: ESCALATED<br/>Action: Stop Cadence + Create AE Task]
-    GuardConflict -- No --> GuardDeal{3. Active Deal in Pipeline?<br/>Tier 1/2 Account + Deal Open}
-    
-    GuardDeal -- Yes --> DealGateCheck{Dual-Gate Passed?}
-    DealGateCheck -- Yes --> StateEscalateDeal[State: ESCALATED<br/>Action: Strategic AE Handover]
-    DealGateCheck -- No --> StateStay[Maintain Current State]
-    
-    GuardDeal -- No --> GuardFatigue{4. Contact Inbox Fatigue?<br/>Touches >= 2 in 7d OR Gap < 72h}
-    GuardFatigue -- Yes --> StatePaused[State: PAUSED<br/>Action: Frequency Hold]
-    GuardFatigue -- No --> GuardPersona{5. Buyer Persona Match?<br/>Contact Role matches Product}
-    
-    GuardPersona -- No --> StatePersonaBlock[State: ACTIVE_CURRENT<br/>Action: Block Switch + Log Mismatch]
-    GuardPersona -- Yes --> GuardDualGate{6. Dual-Gate Passed?<br/>Δ >= 25 & Score >= 50}
-    
-    GuardDualGate -- No --> GuardMonitoring{Δ >= 15?}
-    GuardMonitoring -- Yes --> StateMonitoring[State: MONITORING<br/>Action: Heightened Logging]
-    GuardMonitoring -- No --> StateActive[State: ACTIVE_CURRENT<br/>Action: Continue Standard Cadence]
-    
-    GuardDualGate -- Yes --> GuardCooldown{7. In 48h Cooldown Window?}
-    GuardCooldown -- Fresh Shift --> StateCooldown[State: EVALUATION_COOLDOWN<br/>Action: 48h Hysteresis Hold]
-    GuardCooldown -- 48h Elapsed --> GuardCrossBU{Cross-BU Boundary?}
-    
-    GuardCrossBU -- Cross-BU --> StateEscalateBU[State: ESCALATED<br/>Action: AE Multi-BU Review]
-    GuardCrossBU -- Same BU --> StateSwitch[State: SWITCHING<br/>Action: Batch CRM Property Update]
-```
-
 ---
 
 ### 4. Buying Committee Multi-Stakeholder Resolution
