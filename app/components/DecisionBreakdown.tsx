@@ -32,13 +32,17 @@ export const DecisionBreakdown: React.FC<DecisionBreakdownProps> = ({
     );
   }
 
-  const { decision, delta, scores, guards, reasoning, confidence } = outcome;
+  const { decision, delta, scores, guards, reasoning, confidence, latencyMs } = outcome;
   
-  // Resolve enrolled product and competing product correctly
-  const enrolledCampaign = currentCampaign ?? prospect?.contact.currentCampaign ?? 'product_b';
+  // Resolve enrolled product and competing product dynamically from score distribution
+  const scoreKeys = Object.keys(scores);
+  const defaultCurrent = scoreKeys[0] || 'product_b';
+  const enrolledCampaign = currentCampaign ?? prospect?.contact.currentCampaign ?? defaultCurrent;
   const currentProduct = enrolledCampaign;
-  const otherProducts = Object.keys(scores).filter((p) => p !== currentProduct);
-  const competingProduct = otherProducts.sort((a, b) => (scores[b] ?? 0) - (scores[a] ?? 0))[0] ?? (currentProduct === 'product_b' ? 'product_a' : 'product_b');
+  const otherProducts = scoreKeys.filter((p) => p !== currentProduct);
+  const competingProduct =
+    otherProducts.sort((a, b) => (scores[b] ?? 0) - (scores[a] ?? 0))[0] ??
+    (otherProducts[0] || currentProduct);
 
   const currentScore = scores[currentProduct] ?? 0;
   const competingScore = scores[competingProduct] ?? 0;
@@ -64,6 +68,19 @@ export const DecisionBreakdown: React.FC<DecisionBreakdownProps> = ({
       : decision === 'pause_cooldown'
       ? '#f59e0b'
       : '#10b981';
+
+  const effectiveLatency = jevDetails?.latencyMs ?? latencyMs ?? 0;
+
+  // Dynamically normalize confidence & risk factors to 0-100 range
+  const rawIntentConf = jevDetails?.intentConfidence ?? confidence ?? 0.85;
+  const normalizedIntentConf = rawIntentConf > 1 ? Math.min(100, Math.round(rawIntentConf)) : Math.round(rawIntentConf * 100);
+  const intentLevelLabel = normalizedIntentConf >= 75 ? '(High)' : normalizedIntentConf >= 50 ? '(Moderate)' : '(Low)';
+
+  const rawFlapping = jevDetails?.flappingRisk ?? 0.12;
+  const normalizedFlapping = rawFlapping > 1 ? Math.min(100, Math.round(rawFlapping)) : Math.round(rawFlapping * 100);
+
+  const rawPersonaRisk = jevDetails?.personaMismatchRisk ?? (outcome.personaMismatch ? 0.92 : 0.05);
+  const normalizedPersonaRisk = rawPersonaRisk > 1 ? Math.min(100, Math.round(rawPersonaRisk)) : Math.round(rawPersonaRisk * 100);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -162,7 +179,7 @@ export const DecisionBreakdown: React.FC<DecisionBreakdownProps> = ({
               Inference Latency
             </span>
             <span className="font-mono" style={{ color: '#10b981', fontWeight: 700, marginTop: 1 }}>
-              ⚡ {(jevDetails?.latencyMs ?? 1.1).toFixed(2)}ms
+              ⚡ {effectiveLatency.toFixed(2)}ms
             </span>
           </div>
         </div>
@@ -486,8 +503,8 @@ export const DecisionBreakdown: React.FC<DecisionBreakdownProps> = ({
                 >
                   <div style={{ color: 'var(--text-muted)', fontSize: '0.625rem' }}>Intent Confidence</div>
                   <div className="font-mono" style={{ fontWeight: 700, color: '#fff', marginTop: 1 }}>
-                    {(jevDetails.intentConfidence * 100).toFixed(0)}%{' '}
-                    <span style={{ color: '#10b981', fontSize: '0.625rem' }}>(High)</span>
+                    {normalizedIntentConf}%{' '}
+                    <span style={{ color: '#10b981', fontSize: '0.625rem' }}>{intentLevelLabel}</span>
                   </div>
                 </div>
 
@@ -504,13 +521,13 @@ export const DecisionBreakdown: React.FC<DecisionBreakdownProps> = ({
                     className="font-mono"
                     style={{
                       fontWeight: 700,
-                      color: jevDetails.flappingRisk > 0.4 ? '#f87171' : '#10b981',
+                      color: normalizedFlapping > 40 ? '#f87171' : '#10b981',
                       marginTop: 1,
                     }}
                   >
-                    {(jevDetails.flappingRisk * 100).toFixed(0)}%{' '}
+                    {normalizedFlapping}%{' '}
                     <span style={{ fontSize: '0.625rem' }}>
-                      {jevDetails.flappingRisk > 0.4 ? '(High)' : '(Stable)'}
+                      {normalizedFlapping > 40 ? '(High)' : '(Stable)'}
                     </span>
                   </div>
                 </div>
@@ -528,13 +545,13 @@ export const DecisionBreakdown: React.FC<DecisionBreakdownProps> = ({
                     className="font-mono"
                     style={{
                       fontWeight: 700,
-                      color: jevDetails.personaMismatchRisk > 0.4 ? '#f87171' : '#10b981',
+                      color: normalizedPersonaRisk > 40 ? '#f87171' : '#10b981',
                       marginTop: 1,
                     }}
                   >
-                    {(jevDetails.personaMismatchRisk * 100).toFixed(0)}%{' '}
+                    {normalizedPersonaRisk}%{' '}
                     <span style={{ fontSize: '0.625rem' }}>
-                      {jevDetails.personaMismatchRisk > 0.4 ? '(Mismatch)' : '(Aligned)'}
+                      {normalizedPersonaRisk > 40 ? '(Mismatch)' : '(Aligned)'}
                     </span>
                   </div>
                 </div>

@@ -149,15 +149,15 @@ export const CrmPayloadViewer: React.FC<CrmPayloadViewerProps> = ({
       break;
     case 'handover':
       displayedContent = {
-        protocol: 'Cross-BU Campaign Handover',
-        previousBU: 'BU_Analytics (DataFlow)',
-        targetBU: 'BU_Security (CloudSecure)',
+        protocol: 'Cross-BU Campaign Handover Protocol',
+        accountDomain: activeTargetDomain || committeeResolution?.domain || 'unknown',
+        crossBUTransition: payload.contactPatch.properties.cross_bu_transfer === 'true',
+        targetBU: payload.contactPatch.properties.target_bu || 'BU_Security',
         gracePeriodHours: 48,
-        unenrollEndpoint: '/automation/v3/workflows/wf_analytics_nurture/disenrollments',
-        enrollEndpoint: '/automation/v3/workflows/wf_security_onboarding/enrollments',
+        campaignExecutionStatus: 'Disconnected (Fails Closed — Requires OAuth sequence permissions)',
         idempotencyKey: payload.idempotencyKey,
       };
-      endpointLabel = 'Automated Sequence Handover';
+      endpointLabel = 'Automated Sequence Handover Protocol';
       break;
   }
 
