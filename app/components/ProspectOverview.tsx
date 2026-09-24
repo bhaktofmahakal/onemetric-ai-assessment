@@ -49,6 +49,13 @@ export const ProspectOverview: React.FC<ProspectOverviewProps> = ({
       ? 'FinanceOS (Finance ERP)'
       : 'Unenrolled';
 
+  const enrollmentDays = contact.enrollmentDate
+    ? Math.max(1, Math.round((Date.now() - new Date(contact.enrollmentDate).getTime()) / 86400000))
+    : null;
+  const lastTouchDays = contact.lastTouchDate
+    ? Math.max(0, Math.round((Date.now() - new Date(contact.lastTouchDate).getTime()) / 86400000))
+    : null;
+
   return (
     <div className="panel" style={{ height: '100%' }}>
       <div className="panel-header">
@@ -213,11 +220,15 @@ export const ProspectOverview: React.FC<ProspectOverviewProps> = ({
           >
             <div>
               <div style={{ color: 'var(--text-muted)' }}>Duration</div>
-              <div style={{ fontWeight: 500, color: '#fff', marginTop: 1 }}>12 Days</div>
+              <div style={{ fontWeight: 500, color: '#fff', marginTop: 1 }}>
+                {enrollmentDays !== null ? `${enrollmentDays} Days` : 'Standby'}
+              </div>
             </div>
             <div>
               <div style={{ color: 'var(--text-muted)' }}>Last Touch</div>
-              <div style={{ fontWeight: 500, color: '#fff', marginTop: 1 }}>3d Ago</div>
+              <div style={{ fontWeight: 500, color: '#fff', marginTop: 1 }}>
+                {lastTouchDays !== null ? (lastTouchDays === 0 ? 'Today' : `${lastTouchDays}d Ago`) : 'None'}
+              </div>
             </div>
             <div>
               <div style={{ color: 'var(--text-muted)' }}>Cadence</div>

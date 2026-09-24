@@ -771,15 +771,21 @@ export default function Home() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', fontSize: '0.72rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ color: 'var(--text-muted)' }}>1st-Party Direct:</span>
-                <span className="font-mono" style={{ color: '#fff', fontWeight: 600 }}>1.00</span>
+                <span className="font-mono" style={{ color: '#fff', fontWeight: 600 }}>
+                  {(data.sourceWeights?.['1st_party_direct'] ?? 1.0).toFixed(2)}
+                </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ color: 'var(--text-muted)' }}>1st-Party Passive:</span>
-                <span className="font-mono" style={{ color: '#fff', fontWeight: 600 }}>0.70</span>
+                <span className="font-mono" style={{ color: '#fff', fontWeight: 600 }}>
+                  {(data.sourceWeights?.['1st_party_passive'] ?? 0.7).toFixed(2)}
+                </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ color: 'var(--text-muted)' }}>2nd-Party Reviews:</span>
-                <span className="font-mono" style={{ color: '#fff', fontWeight: 600 }}>0.80</span>
+                <span className="font-mono" style={{ color: '#fff', fontWeight: 600 }}>
+                  {(data.sourceWeights?.['2nd_party'] ?? 0.8).toFixed(2)}
+                </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(52, 211, 153, 0.1)', padding: '2px 8px', borderRadius: 4, border: '1px solid rgba(52, 211, 153, 0.3)' }}>
                 <span style={{ color: 'var(--accent-lime)', fontWeight: 600 }}>3rd-Party Intent (Bombora):</span>
@@ -792,7 +798,9 @@ export default function Home() {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ color: 'var(--text-muted)' }}>Firmographic:</span>
-                <span className="font-mono" style={{ color: '#fff', fontWeight: 600 }}>0.40</span>
+                <span className="font-mono" style={{ color: '#fff', fontWeight: 600 }}>
+                  {(data.sourceWeights?.['firmographic'] ?? 0.4).toFixed(2)}
+                </span>
               </div>
             </div>
 
