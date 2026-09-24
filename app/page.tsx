@@ -141,10 +141,8 @@ export default function Home() {
       const json = await res.json();
       if (json.success) {
         setData(json.data);
-        // If state changed to escalated, switch tab to briefing
-        if (json.data.prospect.fsmState === 'ESCALATED') {
-          setActiveTab('briefing');
-        }
+        // Ensure user stays on Decision & Guard Analysis tab to see the live decision outcome and telemetry
+        setActiveTab('decision');
       } else {
         setError(json.error ?? 'Scenario evaluation failed');
       }
@@ -636,27 +634,66 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Live Loading Progress State */}
-          {isEvaluatingDomain && (
+          {/* Live Loading Progress State with 4-Stage Agent Pipeline Ribbon */}
+          {(isEvaluatingDomain || isLoading) && (
             <div
               style={{
-                marginTop: 2,
-                padding: '8px 12px',
+                marginTop: 4,
+                padding: '10px 14px',
                 borderRadius: 'var(--radius-sm)',
-                background: 'rgba(56, 189, 248, 0.1)',
+                background: 'rgba(56, 189, 248, 0.08)',
                 border: '1px solid rgba(56, 189, 248, 0.35)',
                 color: '#38bdf8',
                 fontSize: '0.74rem',
-                fontWeight: 500,
                 display: 'flex',
-                alignItems: 'center',
+                flexDirection: 'column',
                 gap: 8,
               }}
             >
-              <Activity size={13} className="animate-spin" />
-              <span>
-                <strong>⚡ Running Account Evaluation:</strong> Reading available account signals → Applying decision guards → Recording CRM action results...
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Activity size={14} className="animate-spin" color="#38bdf8" />
+                  <span>
+                    <strong style={{ color: '#fff' }}>
+                      {runningScenarioId
+                        ? `⚡ Executing Scenario: ${runningScenarioId.replace(/_/g, ' ').toUpperCase()}`
+                        : isEvaluatingDomain
+                        ? `⚡ Autonomous Account Evaluation: ${evaluatingDomainName || domainInput || 'domain'}`
+                        : '⚡ RevOps Autonomous Engine Cycle In Flight...'}
+                    </strong>
+                  </span>
+                </div>
+                <span className="pill pill-active font-mono" style={{ fontSize: '0.625rem', padding: '1px 6px' }}>
+                  Multi-Stage Evaluation Pipeline
+                </span>
+              </div>
+
+              {/* 4-Stage Agent Pipeline Ribbon */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gap: 8,
+                  fontSize: '0.68rem',
+                }}
+              >
+                <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '6px 8px', borderRadius: 4, border: '1px solid rgba(56, 189, 248, 0.2)' }}>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.58rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Stage 1</div>
+                  <div style={{ fontWeight: 600, color: '#fff' }}>14d Signal Decay</div>
+                </div>
+                <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '6px 8px', borderRadius: 4, border: '1px solid rgba(56, 189, 248, 0.2)' }}>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.58rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Stage 2</div>
+                  <div style={{ fontWeight: 600, color: '#fff' }}>Dual-Gate (Δ≥25, Floor≥50)</div>
+                </div>
+                <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '6px 8px', borderRadius: 4, border: '1px solid rgba(56, 189, 248, 0.2)' }}>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.58rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Stage 3</div>
+                  <div style={{ fontWeight: 600, color: '#fff' }}>TypeSafe Jev (System One)</div>
+                </div>
+                <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '6px 8px', borderRadius: 4, border: '1px solid rgba(56, 189, 248, 0.2)' }}>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.58rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Stage 4</div>
+                  <div style={{ fontWeight: 600, color: '#fff' }}>HubSpot v3 CRM Sync</div>
+                </div>
+              </div>
             </div>
           )}
 
