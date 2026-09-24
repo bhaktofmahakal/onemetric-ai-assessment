@@ -44,9 +44,7 @@ export const BuyingCommitteeViewer: React.FC<BuyingCommitteeViewerProps> = ({
           Multi-Contact Buying Committee Resolution
         </div>
         <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: 6, maxWidth: 560, margin: '6px auto 16px' }}>
-          In B2B RevOps, intent data arrives at the Account Domain level (e.g. stripe.com, snowflake.com).
-          The autonomous agent queries HubSpot CRM for all active stakeholders and resolves each individual
-          journey concurrently without duplicate rep spam.
+          In B2B RevOps, intent signals arrive at the company domain level. The engine evaluates all buying committee contacts concurrently, applying persona filtering and touch fatigue limits to each member while creating a single consolidated task for the AE.
         </p>
         <p style={{ fontSize: '0.72rem', color: 'var(--accent-lime)', marginTop: 0, marginBottom: 16, fontWeight: 500 }}>
           ↑ Enter any domain in the Evaluator above and click "Evaluate Committee" to see the full resolution.
@@ -174,7 +172,7 @@ export const BuyingCommitteeViewer: React.FC<BuyingCommitteeViewerProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Globe size={16} color="#38bdf8" />
               <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff' }}>
-                Autonomous Market Signal &amp; Hiring Corroboration
+                External Signal &amp; Market Corroboration
               </span>
               <span
                 className={`pill ${
@@ -381,12 +379,12 @@ export const BuyingCommitteeViewer: React.FC<BuyingCommitteeViewerProps> = ({
                 Associated: 1 Company + {contactOutcomes.length} Contacts
               </span>
               <span className="pill pill-active font-mono">
-                0 Duplicate Spam Tasks
+                1 Consolidated Task (Zero Duplicate Alerts)
               </span>
             </div>
           </div>
 
-          {/* OneMetric Cognitive Strategic Synthesis */}
+          {/* Strategic Escalation Briefing */}
           {briefing && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
               <div
@@ -465,7 +463,7 @@ export const BuyingCommitteeViewer: React.FC<BuyingCommitteeViewerProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <CheckCircle2 size={15} color="#34d399" />
           <span style={{ color: '#e2e8f0' }}>
-            HubSpot CRM Sync: <strong>Batch Updated {contactOutcomes.length} Contacts</strong> in 1 HTTP Request.
+            HubSpot CRM Sync: <strong>Batch synchronized {contactOutcomes.length} committee contacts</strong> in 1 HTTP Request.
           </span>
         </div>
         <span className="pill pill-active font-mono" style={{ fontSize: '0.65rem' }}>

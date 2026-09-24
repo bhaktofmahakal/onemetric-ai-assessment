@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test:engine": "npx tsx src/test-engine.ts",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "node --max-old-space-size=4096 ./node_modules/typescript/bin/tsc --noEmit",
     "lint": "next lint",
     "dev": "next dev",
     "build": "next build",

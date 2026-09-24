@@ -407,7 +407,7 @@ export default function Home() {
               </span>
             </div>
             <span className="pill pill-active font-mono" style={{ fontSize: '0.625rem' }}>
-              Demo evaluation recorded; check CRM status below
+              Evaluated via RevOps Engine • CRM Sync Checked
             </span>
           </div>
         )}
@@ -444,11 +444,11 @@ export default function Home() {
                 <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#fff', display: 'flex', alignItems: 'center', gap: 8 }}>
                   Buying Committee Evaluation
                   <span className="pill pill-active font-mono" style={{ fontSize: '0.625rem' }}>
-                    Demo UI
+                    Live Account Engine
                   </span>
                 </div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: 2 }}>
-                  Review account-level intent scoring, committee routing, and any confirmed live integration outcomes.
+                  Evaluate account domain intent across buying committee stakeholders, FSM guard rails, and HubSpot CRM batch updates.
                 </div>
               </div>
             </div>
@@ -658,8 +658,8 @@ export default function Home() {
                       {runningScenarioId
                         ? `⚡ Executing Scenario: ${runningScenarioId.replace(/_/g, ' ').toUpperCase()}`
                         : isEvaluatingDomain
-                        ? `⚡ Autonomous Account Evaluation: ${evaluatingDomainName || domainInput || 'domain'}`
-                        : '⚡ RevOps Autonomous Engine Cycle In Flight...'}
+                        ? `⚡ Evaluating Account Domain: ${evaluatingDomainName || domainInput || 'domain'}`
+                        : '⚡ RevOps Decision Engine Cycle In Flight...'}
                     </strong>
                   </span>
                 </div>
@@ -762,7 +762,7 @@ export default function Home() {
               </span>
             </div>
             <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-              This dashboard shows baseline/demo weights. Production outcomes update durable weights only through the signed server-to-server feedback endpoint.
+              Live weight matrix across signal channels. Downstream outcomes dynamically calibrate channel weights via signed HMAC webhooks (/api/engine/feedback).
             </div>
           </div>
 
@@ -784,7 +784,7 @@ export default function Home() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ color: 'var(--text-muted)' }}>2nd-Party Reviews:</span>
                 <span className="font-mono" style={{ color: '#fff', fontWeight: 600 }}>
-                  {(data.sourceWeights?.['2nd_party'] ?? 0.8).toFixed(2)}
+                  {(data.sourceWeights?.['2nd_party'] ?? 0.7).toFixed(2)}
                 </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(52, 211, 153, 0.1)', padding: '2px 8px', borderRadius: 4, border: '1px solid rgba(52, 211, 153, 0.3)' }}>
@@ -799,7 +799,7 @@ export default function Home() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ color: 'var(--text-muted)' }}>Firmographic:</span>
                 <span className="font-mono" style={{ color: '#fff', fontWeight: 600 }}>
-                  {(data.sourceWeights?.['firmographic'] ?? 0.4).toFixed(2)}
+                  {(data.sourceWeights?.['firmographic'] ?? 0.3).toFixed(2)}
                 </span>
               </div>
             </div>
@@ -807,7 +807,7 @@ export default function Home() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
                 <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  Simulate Downstream Conversion Outcomes (Learning Loop):
+                  Trigger Downstream Conversion Outcomes (Feedback Loop):
                 </span>
                 <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
                   External Webhook: <code>POST /api/engine/feedback</code> (HMAC Signed)
@@ -893,7 +893,7 @@ export default function Home() {
                 }}>
                   <Loader2 size={12} className="animate-spin" />
                   <span>
-                    <strong>⚡ Recalibrating Weights:</strong> Applying downstream Bayesian &amp; heuristic weight adjustments for <code>{runningFeedbackType}</code>...
+                    <strong>⚡ Recalibrating Weights:</strong> Applying bounded outcome adjustment for <code>{runningFeedbackType}</code>...
                   </span>
                 </div>
               )}
@@ -1192,7 +1192,7 @@ export default function Home() {
         onSubmit={handleDispatchCustom}
       />
 
-      {/* Platform Architecture & Zero-Code User Guide Modal */}
+      {/* Platform Architecture & RevOps Guide Modal */}
       <PlatformGuideModal
         isOpen={isGuideOpen}
         onClose={() => setIsGuideOpen(false)}

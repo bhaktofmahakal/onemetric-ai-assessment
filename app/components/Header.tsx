@@ -154,7 +154,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={onOpenGuide}
               className="btn btn-outline"
-              title="Platform Architecture & Zero-Code User Guide"
+              title="Platform Architecture &amp; RevOps Guide"
               style={{ padding: '6px 12px', fontSize: '0.75rem', gap: 6 }}
             >
               <HelpCircle size={13} color="var(--accent-lime)" />

@@ -59,7 +59,7 @@ export const CrmPayloadViewer: React.FC<CrmPayloadViewerProps> = ({
         </div>
         <div style={{ maxWidth: 460 }}>
           <h4 style={{ fontSize: '0.925rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>
-            Autonomous HubSpot CRM Sync Gateway
+            HubSpot CRM Integration Payloads
           </h4>
           <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5, margin: 0 }}>
             HubSpot REST API v3 payloads (Contact PATCH, Batch Committee Updates, Custom Object POST, and Consolidated AE Tasks) are generated automatically whenever an inbound domain intent surge is evaluated or a simulation scenario is dispatched.

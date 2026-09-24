@@ -53,10 +53,10 @@ export const AiBriefingPanel: React.FC<AiBriefingPanelProps> = ({
         </div>
         <div style={{ maxWidth: 480 }}>
           <h4 style={{ fontSize: '0.925rem', fontWeight: 600, color: '#fff', marginBottom: 6 }}>
-            Autonomous Strategic Sales Briefing Standby
+            Account Executive Escalation Memo (Tier-1 Deal Conflict Guard)
           </h4>
           <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5, margin: 0 }}>
-            Standard nurture campaigns execute autonomously without manual overhead. When the OneMetric engine detects high multi-product interest (&gt;70 on multiple BUs) or active enterprise pipeline deals, it automatically triggers a System Two strategic sales memo to align Account Executives.
+            Standard nurture campaigns execute autonomously while single-product intent is clear. When dual-gate intent detects multi-product interest (&gt;70 across BUs) or an active pipeline deal ($120K open opportunity), automated marketing pauses and dispatches a consolidated escalation task to the assigned Account Executive to prevent competing cross-BU outreach.
           </p>
         </div>
         {onTriggerEscalation && (
@@ -69,12 +69,12 @@ export const AiBriefingPanel: React.FC<AiBriefingPanelProps> = ({
             {isLoading ? (
               <>
                 <Loader2 size={13} className="animate-spin" />
-                Simulating Enterprise Conflict...
+                Simulating Active Deal Conflict...
               </>
             ) : (
               <>
                 <ShieldAlert size={13} />
-                Simulate Enterprise Account Conflict (Scenario 4)
+                Simulate Active Deal &amp; Multi-BU Conflict (Scenario 4)
               </>
             )}
           </button>
@@ -100,18 +100,11 @@ export const AiBriefingPanel: React.FC<AiBriefingPanelProps> = ({
 
   const latencyMs = briefing?.latencyMs ?? 0.12;
   const isLive = briefing?.isLive ?? false;
-
-  let sanitizedEngine = 'OneMetric Strategic Agent (System Two)';
-  if (briefing?.engine) {
-    sanitizedEngine = briefing.engine
-      .replace(/gemini[^\s)]*/gi, 'OneMetric Strategic Agent')
-      .replace(/google/gi, 'OneMetric')
-      .replace(/\s+/g, ' ');
-  }
+  const engineLabel = briefing?.engine || (isLive ? 'Gemini Structured Output' : 'RevOps Policy Synthesizer');
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      {/* Escalation Context Banner & OneMetric System Two Telemetry */}
+      {/* Escalation Context Banner & System Two Telemetry */}
       <div
         style={{
           background: 'rgba(239, 68, 68, 0.06)',
@@ -140,7 +133,7 @@ export const AiBriefingPanel: React.FC<AiBriefingPanelProps> = ({
           <span className="pill pill-critical">Active Escalation</span>
           <span className={`pill ${isLive ? 'pill-active' : 'pill-warning'} font-mono`} style={{ fontSize: '0.675rem' }}>
             <Sparkles size={11} color={isLive ? 'var(--accent-lime)' : '#fbbf24'} />
-            {sanitizedEngine} • {latencyMs.toFixed(1)}ms
+            {engineLabel} • {latencyMs.toFixed(1)}ms
           </span>
         </div>
       </div>

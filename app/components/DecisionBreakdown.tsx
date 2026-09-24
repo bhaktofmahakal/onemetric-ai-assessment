@@ -119,7 +119,7 @@ export const DecisionBreakdown: React.FC<DecisionBreakdownProps> = ({
                 fontWeight: 600,
               }}
             >
-              Evaluated Autonomous RevOps Action
+              Evaluated RevOps Decision
             </div>
             <div
               style={{
@@ -471,7 +471,7 @@ export const DecisionBreakdown: React.FC<DecisionBreakdownProps> = ({
                       marginBottom: 3,
                     }}
                   >
-                    Autonomous Decision Rationale
+                    Decision Rationale
                   </div>
                   <div style={{ fontSize: '0.71rem', color: '#e2e8f0', lineHeight: 1.45 }}>
                     {reasoning ||

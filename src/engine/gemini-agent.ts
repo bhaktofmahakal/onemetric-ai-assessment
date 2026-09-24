@@ -134,9 +134,9 @@ Provide the structured JSON memo:`;
                 ? parsed.actionChecklist.slice(0, 3)
                 : getDefaultChecklist(prospect),
               latencyMs: Math.round(elapsed * 10) / 10,
-              engine: 'OneMetric Cognitive Agent (System Two)',
+              engine: `Gemini (${modelName})`,
               isLive: true,
-              modelUsed: 'OneMetric Cognitive Agent (System Two)',
+              modelUsed: modelName,
               generatedAt: new Date().toISOString(),
             };
           }
@@ -158,9 +158,9 @@ Provide the structured JSON memo:`;
     crossSolutionStrategy: getDefaultStrategy(scores),
     actionChecklist: getDefaultChecklist(prospect),
     latencyMs: Math.round(Math.max(0.08, elapsed) * 10) / 10,
-    engine: 'OneMetric Strategic Synthesizer (Calibrated)',
+    engine: 'Deterministic RevOps Synthesizer (Rule-Based)',
     isLive: false,
-    modelUsed: 'OneMetric Strategic Synthesizer (Calibrated)',
+    modelUsed: 'Deterministic RevOps Synthesizer (Rule-Based)',
     generatedAt: new Date().toISOString(),
   };
 }

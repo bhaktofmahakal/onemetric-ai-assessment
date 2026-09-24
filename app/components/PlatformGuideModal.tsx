@@ -84,10 +84,10 @@ export const PlatformGuideModal: React.FC<PlatformGuideModalProps> = ({
             </div>
             <div>
               <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff' }}>
-                OneMetric RevOps Platform — How It Works &amp; User Guide
+                Enterprise RevOps Architecture &amp; User Guide
               </div>
               <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-                Zero-code enterprise architecture for Marketing Ops, Sales AEs, and Leadership
+                Operational workflows for Marketing Ops, Sales AEs, and RevOps Leadership
               </div>
             </div>
           </div>
@@ -122,7 +122,7 @@ export const PlatformGuideModal: React.FC<PlatformGuideModalProps> = ({
           <div>
             <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
               <Users size={16} color="var(--accent-lime)" />
-              1. How Everyday Teams Use This Platform (Zero Terminal / Zero Code)
+              1. Operational Workflows Across Revenue Teams
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 12 }}>
               <div
@@ -137,9 +137,9 @@ export const PlatformGuideModal: React.FC<PlatformGuideModalProps> = ({
                   Marketing Operations
                 </div>
                 <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                  Marketers continue building email sequences in <strong>HubSpot Sequences or Marketo</strong>.
-                  OneMetric automatically pauses, unenrolls, or switches prospects in the background when intent surges,
-                  without manual list exports.
+                  Marketing Ops configures email journeys in <strong>HubSpot</strong>.
+                  OneMetric monitors multi-source intent, enforces cadence limits (max 2 touches in 7 days),
+                  and routes switch/pause requirements through CRM properties to avoid conflicting outreach.
                 </p>
               </div>
 
@@ -156,7 +156,7 @@ export const PlatformGuideModal: React.FC<PlatformGuideModalProps> = ({
                 </div>
                 <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
                   Reps work 100% inside <strong>HubSpot CRM</strong>. When an escalation occurs ($120K open deal),
-                  OneMetric writes a single high-priority Task with autonomous strategic sales briefing, discovery questions, and objection handling.
+                  OneMetric writes a single high-priority Task with deal risk analysis, cross-solution positioning, and tailored discovery questions.
                 </p>
               </div>
 
@@ -183,7 +183,7 @@ export const PlatformGuideModal: React.FC<PlatformGuideModalProps> = ({
           <div>
             <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
               <Cpu size={16} color="#38bdf8" />
-              2. The 3 Autonomous Agent Tiers (Assignment Solution)
+              2. Decision Engine Architecture &amp; Guard Enforcement
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <div
@@ -223,7 +223,7 @@ export const PlatformGuideModal: React.FC<PlatformGuideModalProps> = ({
                 <span className="pill pill-warning font-mono" style={{ flexShrink: 0 }}>System Two</span>
                 <div>
                   <div style={{ fontWeight: 600, color: '#fff', fontSize: '0.78rem' }}>
-                    OneMetric Cognitive Strategic Agent (System Two)
+                    Strategic Escalation Briefing (System Two)
                   </div>
                   <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: 2 }}>
                     Invoked only on high-stakes escalations ($120K open deals or multi-BU clashes). Formulates a unified cross-solution
@@ -296,7 +296,7 @@ export const PlatformGuideModal: React.FC<PlatformGuideModalProps> = ({
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', color: 'var(--text-muted)' }}>
             <ShieldCheck size={14} color="#34d399" />
-            100% Alignment with OneMetric AI Assessment Specification
+            Aligned with OneMetric RevOps Assessment Specification (Dual-Gate, FSM, HubSpot CRM)
           </div>
           <button onClick={onClose} className="btn btn-primary" style={{ padding: '6px 14px', fontSize: '0.75rem' }}>
             Got it, Let's Explore
