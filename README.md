@@ -1,6 +1,6 @@
 # OneMetric: Dynamic Campaign Segmentation Engine & Autonomous RevOps Agent
 
-A production-grade RevOps decision platform and autonomous AI agent designed for **Dynamic Campaign Segmentation across Multi-Business-Unit Enterprises**.
+A RevOps decision platform and autonomous AI agent designed for **Dynamic Campaign Segmentation across Multi-Business-Unit Enterprises**.
 
 This system resolves the core go-to-market challenge: **distinguishing meaningful, high-intent buyer shifts from volatile, noisy signals**, preventing conflicting multi-BU messaging, eliminating prospect fatigue, and orchestrating multi-stakeholder buying committees without sales rep spam.
 
