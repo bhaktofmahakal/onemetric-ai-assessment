@@ -160,6 +160,33 @@ All source weights are bounded between `[0.10, 1.00]` in persistent Redis storag
 
 The live dashboard at **[https://onemetric-ai-assessment.vercel.app](https://onemetric-ai-assessment.vercel.app)** is built on **Progressive Disclosure** — providing executive clarity in the first 3 seconds while keeping deep engineering inspection accessible in one click.
 
+```text
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│                                 ONEMETRIC REVOPS ENGINE                                 │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│ [Header] Live Webhook Stream: Active | Latency: 0.08ms | How It Works | Reset State     │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│ [Executive Hero Card — 3-Second Business Verdict]                                       │
+│  DECISION: Continue Current Journey (or Escalate to Sales)                              │
+│  RATIONALE: Baseline initial enrollment for Sarah Chen in DataFlow                      │
+│  METRICS: Account: TechCorp Inc | Lead: Sarah Chen | State: Active | Deal: $120k        │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│ [Account Evaluator Bar]                                                                 │
+│  Active Target: techcorp.com | Quick Pills: [techcorp.com] [snowflake.com] [stripe.com] │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│ [Scores Bar] CloudSecure: 0 | DataFlow ★: 35 | FinanceOS: 0 | Score Gap: -35.0          │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│ [Progressive Disclosure Collapsibles]                                                   │
+│  ▶ Test Scenarios — Run pre-built evaluation cases (Scenarios 1, 2, 3, 4)               │
+│  ▶ Downstream Feedback — Calibrate weights (+ Meeting, + Reply, - Lost, - Unsubscribed) │
+│  ▶ Account & Prospect Details — Full Profile & Deterministic FSM Visualizer            │
+│  ▶ Deep Analysis — Decision Logic | Buying Committee | Sales Briefing | CRM | Audit    │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+> **Why TechCorp & Sarah Chen on Initial Load?**  
+> On initial visit or after clicking **Reset State**, the engine loads **TechCorp International** (`techcorp.com`) and its lead contact **Sarah Chen** (VP of Engineering) as the baseline benchmark prospect enrolled in DataFlow (`BU_Analytics`). This baseline establishes the controlled starting state for the RevOps story. Clicking `snowflake.com` or `stripe.com` dynamically evaluates a different buying committee and public web footprint.
+
 ### 1. Executive Hero View (First 3 Seconds)
 The top Hero card immediately answers three critical business questions:
 - **Decision:** *What did the engine decide?* (e.g. `Continue Current Journey` or `Escalate to Sales`)
