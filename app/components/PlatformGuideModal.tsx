@@ -2,19 +2,19 @@
 
 import React from 'react';
 import {
-  HelpCircle,
   X,
-  Users,
-  Cpu,
-  Layers,
+  Radio,
+  ShieldCheck,
   Sparkles,
   Database,
-  ShieldCheck,
-  CheckCircle2,
+  Users,
+  Play,
   ArrowRight,
-  Workflow,
-  Radio,
+  CheckCircle2,
+  AlertTriangle,
   Clock,
+  TrendingUp,
+  Briefcase,
 } from 'lucide-react';
 
 interface PlatformGuideModalProps {
@@ -46,20 +46,20 @@ export const PlatformGuideModal: React.FC<PlatformGuideModalProps> = ({
         style={{
           background: 'var(--bg-surface)',
           border: '1px solid var(--border-strong)',
-          borderRadius: 'var(--radius-lg)',
+          borderRadius: 14,
           width: '100%',
-          maxWidth: 820,
+          maxWidth: 780,
           maxHeight: '90vh',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 24px 48px rgba(0, 0, 0, 0.6)',
+          boxShadow: '0 24px 60px rgba(0, 0, 0, 0.7)',
           overflow: 'hidden',
         }}
       >
-        {/* Modal Header */}
+        {/* Header */}
         <div
           style={{
-            padding: '16px 20px',
+            padding: '18px 24px',
             borderBottom: '1px solid var(--border-hairline)',
             display: 'flex',
             alignItems: 'center',
@@ -67,226 +67,194 @@ export const PlatformGuideModal: React.FC<PlatformGuideModalProps> = ({
             background: 'var(--bg-inset)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div
-              style={{
-                width: 28,
-                height: 28,
-                borderRadius: 'var(--radius-sm)',
-                background: 'rgba(56, 189, 248, 0.1)',
-                border: '1px solid rgba(56, 189, 248, 0.25)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Workflow size={15} color="#38bdf8" />
+          <div>
+            <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.01em' }}>
+              How OneMetric Works
             </div>
-            <div>
-              <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff' }}>
-                Enterprise RevOps Architecture &amp; User Guide
-              </div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-                Operational workflows for Marketing Ops, Sales AEs, and RevOps Leadership
-              </div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: 2 }}>
+              Automating campaign switches without spamming prospects or ruining live sales deals.
             </div>
           </div>
           <button
             onClick={onClose}
             style={{
-              background: 'transparent',
-              border: 'none',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid var(--border-hairline)',
+              borderRadius: 6,
               color: 'var(--text-muted)',
               cursor: 'pointer',
-              padding: 4,
+              padding: '6px 8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
-        {/* Modal Body */}
+        {/* Modal Content */}
         <div
           style={{
-            padding: '20px',
+            padding: '16px 22px',
             overflowY: 'auto',
             display: 'flex',
             flexDirection: 'column',
-            gap: 20,
-            fontSize: '0.8rem',
-            color: 'var(--text-secondary)',
-            lineHeight: 1.5,
+            gap: 16,
           }}
         >
-          {/* Section 1: Who Uses It & How (No Coding Required) */}
+          {/* Top 3-Step Visual Flow */}
           <div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-              <Users size={16} color="var(--accent-lime)" />
-              1. Operational Workflows Across Revenue Teams
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600, marginBottom: 10 }}>
+              The 3-Step Decision Flow
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+              {/* Step 1 */}
               <div
                 style={{
                   background: 'var(--bg-inset)',
                   border: '1px solid var(--border-hairline)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '12px',
+                  borderRadius: 10,
+                  padding: '14px 16px',
                 }}
               >
-                <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#fff', marginBottom: 4 }}>
-                  Marketing Operations
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <div style={{ width: 26, height: 26, borderRadius: 6, background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Radio size={14} />
+                  </div>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#fff' }}>1. Detect Signals</span>
                 </div>
-                <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                  Marketing Ops configures email journeys in <strong>HubSpot</strong>.
-                  OneMetric monitors multi-source intent, enforces cadence limits (max 2 touches in 7 days),
-                  and routes switch/pause requirements through CRM properties to avoid conflicting outreach.
+                <p style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+                  Collects buyer intent from website visits, G2 reviews, and Bombora surges. Single isolated spikes are capped so they never trigger false switches.
                 </p>
               </div>
 
+              {/* Step 2 */}
               <div
                 style={{
                   background: 'var(--bg-inset)',
                   border: '1px solid var(--border-hairline)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '12px',
+                  borderRadius: 10,
+                  padding: '14px 16px',
                 }}
               >
-                <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#fff', marginBottom: 4 }}>
-                  Sales AEs &amp; SDRs
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <div style={{ width: 26, height: 26, borderRadius: 6, background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ShieldCheck size={14} />
+                  </div>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#fff' }}>2. Apply Safety Rules</span>
                 </div>
-                <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                  Reps work 100% inside <strong>HubSpot CRM</strong>. When an escalation occurs ($120K open deal),
-                  OneMetric writes a single high-priority Task with deal risk analysis, cross-solution positioning, and tailored discovery questions.
+                <p style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+                  Before changing anything, the engine checks contact fatigue, active deals, buyer job role, and waits 48h to confirm interest is sustained.
                 </p>
               </div>
 
+              {/* Step 3 */}
               <div
                 style={{
                   background: 'var(--bg-inset)',
                   border: '1px solid var(--border-hairline)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '12px',
+                  borderRadius: 10,
+                  padding: '14px 16px',
                 }}
               >
-                <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#fff', marginBottom: 4 }}>
-                  RevOps &amp; Leadership
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <div style={{ width: 26, height: 26, borderRadius: 6, background: 'rgba(167, 139, 250, 0.1)', color: '#a78bfa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Database size={14} />
+                  </div>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#fff' }}>3. Sync to CRM</span>
                 </div>
-                <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                  Admins use <strong>this Console</strong> as Mission Control. They inspect real-time intent decay,
-                  simulate buying committees, review the audit trail, and verify CRM sync payloads.
+                <p style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+                  Updates HubSpot sequences automatically. If an open deal exists ($120k+), it alerts the Sales AE with an AI-generated briefing instead of emailing.
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Section 2: End-to-End Autonomous Pipeline */}
+          {/* Key Safety Guards Explained in Plain English */}
           <div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-              <Cpu size={16} color="#38bdf8" />
-              2. Decision Engine Architecture &amp; Guard Enforcement
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600, marginBottom: 10 }}>
+              The 4 Safety Guards (Why RevOps Teams Trust It)
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <div
-                style={{
-                  background: 'var(--bg-inset)',
-                  border: '1px solid var(--border-hairline)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '10px 14px',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: 12,
-                }}
-              >
-                <span className="pill pill-active font-mono" style={{ flexShrink: 0 }}>System One</span>
-                <div>
-                  <div style={{ fontWeight: 600, color: '#fff', fontSize: '0.78rem' }}>
-                    Sub-millisecond Policy Engine (Jev / Deterministic FSM)
-                  </div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: 2 }}>
-                    Handles 98% of high-volume webhooks in &lt;1ms. Evaluates 5 safety guards: Fatigue Cap (2 touches/7d),
-                    Dual-Gate Hysteresis (Δ ≥ 25 &amp; Score ≥ 50), Persona Relevance, Cross-BU Ownership, and Active Deals.
-                  </div>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  background: 'var(--bg-inset)',
-                  border: '1px solid var(--border-hairline)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '10px 14px',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: 12,
-                }}
-              >
-                <span className="pill pill-warning font-mono" style={{ flexShrink: 0 }}>System Two</span>
-                <div>
-                  <div style={{ fontWeight: 600, color: '#fff', fontSize: '0.78rem' }}>
-                    Strategic Escalation Briefing (System Two)
-                  </div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: 2 }}>
-                    Invoked only on high-stakes escalations ($120K open deals or multi-BU clashes). Formulates a unified cross-solution
-                    commercial strategy, eliminating competing BU sales friction and synthesizing personalized discovery checklists for the rep.
+              {[
+                {
+                  icon: <Clock size={15} color="#38bdf8" />,
+                  title: 'Anti-Spam Fatigue Cap (Max 2 Touches / 7 Days)',
+                  desc: 'If a prospect received 2 emails in the last 7 days or was contacted within 72 hours, the engine pauses outreach so they are never overloaded.',
+                },
+                {
+                  icon: <Briefcase size={15} color="#f87171" />,
+                  title: 'Active Deal Protection (Hands off Open Pipeline)',
+                  desc: 'When an Account Executive is already working a deal (e.g. $120k opportunity), marketing nurture stops immediately to prevent sending contradictory messages.',
+                },
+                {
+                  icon: <Users size={15} color="#fbbf24" />,
+                  title: 'Buyer Persona Matching (Right Message to Right Person)',
+                  desc: 'If an account surges on Finance software but the contact is an Engineering lead, the campaign stays put rather than sending irrelevant content.',
+                },
+                {
+                  icon: <TrendingUp size={15} color="#34d399" />,
+                  title: '48-Hour Cooldown (Anti-Flapping)',
+                  desc: 'A 1-hour browsing spike does not trigger a campaign switch. The engine holds for 48 hours to confirm the buyer interest is genuine and sustained.',
+                },
+              ].map((g, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    background: 'var(--bg-inset)',
+                    border: '1px solid var(--border-hairline)',
+                    borderRadius: 8,
+                    padding: '10px 14px',
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: 12,
+                  }}
+                >
+                  <div style={{ marginTop: 2 }}>{g.icon}</div>
+                  <div>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#fff' }}>{g.title}</div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', marginTop: 2, lineHeight: 1.45 }}>{g.desc}</div>
                   </div>
                 </div>
-              </div>
-
-              <div
-                style={{
-                  background: 'var(--bg-inset)',
-                  border: '1px solid var(--border-hairline)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '10px 14px',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: 12,
-                }}
-              >
-                <span className="pill pill-neutral font-mono" style={{ flexShrink: 0 }}>Cron &amp; Loop</span>
-                <div>
-                  <div style={{ fontWeight: 600, color: '#fff', fontSize: '0.78rem' }}>
-                    Bounded 48h Cooldown &amp; Feedback Worker
-                  </div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: 2 }}>
-                    Daily background cron (<code>/api/engine/cron/evaluate-cooldowns</code>) processes due cooldowns and retries; timing can be up to 24 hours late.
-                    Signed downstream feedback (<code>/api/engine/feedback</code>) applies fixed heuristic source-weight updates (+0.08 on meeting booked, -0.05 on deal lost).
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
 
-          {/* Section 3: Interactive Guide on How to Test the Console */}
-          <div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-              <Layers size={16} color="#fbbf24" />
-              3. How to Test Every Feature Interactively in this Console
+          {/* Quick 30-Second Guide on What to Click */}
+          <div
+            style={{
+              background: 'rgba(56, 189, 248, 0.04)',
+              border: '1px solid rgba(56, 189, 248, 0.2)',
+              borderRadius: 10,
+              padding: '14px 16px',
+            }}
+          >
+            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+              <Sparkles size={14} />
+              How to Test this Live Dashboard
             </div>
-            <ul style={{ paddingLeft: 18, margin: 0, display: 'flex', flexDirection: 'column', gap: 6, fontSize: '0.74rem' }}>
+            <ul style={{ margin: 0, paddingLeft: 18, fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: 6, lineHeight: 1.45 }}>
               <li>
-                <strong>Click any of the 4 Scenarios:</strong> Runs one of four synthetic scenarios: zero-baseline trap, corroborated switch, persona mismatch, or enterprise deal escalation.
+                <strong style={{ color: '#fff' }}>Click "Test Scenarios" accordion:</strong> Try <span style={{ color: '#fbbf24' }}>Uncorroborated Surge</span> (stops false switch) or <span style={{ color: '#f87171' }}>Enterprise Account Conflict</span> (shows $120k deal protection).
               </li>
               <li>
-                <strong>Switch to "Buying Committee" Tab:</strong> Click "Evaluate Buying Committee" to evaluate four seeded demo stakeholders (VP Eng, DevOps, CISO, Finance) against a synthetic domain surge.
+                <strong style={{ color: '#fff' }}>Evaluate any domain:</strong> Click <code style={{ color: '#38bdf8' }}>snowflake.com</code> or <code style={{ color: '#38bdf8' }}>stripe.com</code> to see real-time buying committee analysis and public web corroboration.
               </li>
               <li>
-                <strong>Click "+48h Advance":</strong> Advances the demo clock to exercise cooldown transitions; it does not invoke the production Redis worker.
+                <strong style={{ color: '#fff' }}>Downstream Feedback:</strong> Click <span style={{ color: 'var(--accent-lime)' }}>+ Meeting Booked</span> to see how real sales outcomes automatically recalibrate signal weights.
               </li>
               <li>
-                <strong>Inspect "HubSpot CRM Sync Payloads":</strong> Review the demo payload. Live CRM writes run only through configured server routes and require HubSpot credentials.
-              </li>
-              <li>
-                <strong>Inject Custom Signals:</strong> Click "Custom Signal" to simulate arbitrary G2 reviews, pricing visits, or Bombora spikes on any product.
+                <strong style={{ color: '#fff' }}>Deep Analysis:</strong> Open the bottom accordion to inspect exact mathematical decision formulas, AI briefing memo, and HubSpot CRM payloads.
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Modal Footer */}
+        {/* Footer */}
         <div
           style={{
-            padding: '12px 20px',
+            padding: '14px 24px',
             borderTop: '1px solid var(--border-hairline)',
             display: 'flex',
             alignItems: 'center',
@@ -295,10 +263,14 @@ export const PlatformGuideModal: React.FC<PlatformGuideModalProps> = ({
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-            <ShieldCheck size={14} color="#34d399" />
-            Aligned with OneMetric RevOps Assessment Specification (Dual-Gate, FSM, HubSpot CRM)
+            <CheckCircle2 size={14} color="#34d399" />
+            Deterministic Business Guardrails First, AI Reasoning Second
           </div>
-          <button onClick={onClose} className="btn btn-primary" style={{ padding: '6px 14px', fontSize: '0.75rem' }}>
+          <button
+            onClick={onClose}
+            className="btn btn-primary"
+            style={{ padding: '7px 18px', fontSize: '0.78rem' }}
+          >
             Got it, Let's Explore
           </button>
         </div>
