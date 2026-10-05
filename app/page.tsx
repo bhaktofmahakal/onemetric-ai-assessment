@@ -16,7 +16,7 @@ import { EnginePreloader } from './components/EnginePreloader';
 import type { DemoStoreState } from '@/src/engine/demo-store';
 import type { SourceType, ProspectState } from '@/src/types';
 import type { BuyingCommitteeResolution } from '@/src/engine/multi-contact-evaluator';
-import { Calculator, ShieldAlert, Database, History, CheckCircle2, ShieldCheck, Activity, Building2, Users, Globe, Play, Copy, Check, TrendingUp, Sliders, Layers, Loader2 } from 'lucide-react';
+import { Calculator, ShieldAlert, Database, History, CheckCircle2, ShieldCheck, Activity, Building2, Users, Globe, Play, Copy, Check, TrendingUp, Sliders, Layers, Loader2, ChevronDown, ChevronRight, Zap, ArrowRight, AlertTriangle, Clock, BarChart3 } from 'lucide-react';
 
 export default function Home() {
   const [data, setData] = useState<DemoStoreState | null>(null);
@@ -141,7 +141,6 @@ export default function Home() {
       const json = await res.json();
       if (json.success) {
         setData(json.data);
-        // Ensure user stays on Decision & Guard Analysis tab to see the live decision outcome and telemetry
         setActiveTab('decision');
       } else {
         setError(json.error ?? 'Scenario evaluation failed');
@@ -333,8 +332,7 @@ export default function Home() {
   const { prospect, scores, delta, lastDecisionOutcome, lastSyncPayload, lastJevDetails, auditLedger, activeScenarioId } = data;
   
   // Synchronize Active Account & Primary Committee Contact across entire page
-  const hasEvaluated = !!(committeeData || data.lastBuyingCommitteeResolution);
-  const displayAccount = committeeData?.account || (hasEvaluated ? prospect.account : null);
+  const displayAccount = committeeData?.account || prospect.account;
   const primaryOutcome = committeeData?.contactOutcomes?.[0];
   const displayContact = primaryOutcome
     ? {
@@ -366,6 +364,73 @@ export default function Home() {
   const isInCooldown = prospect.fsmState === 'EVALUATION_COOLDOWN';
   const isEscalated = prospect.fsmState === 'ESCALATED';
 
+  // --- Human-friendly decision labels ---
+  const getDecisionLabel = (decision?: string) => {
+    switch (decision) {
+      case 'continue': return 'Continue Current Journey';
+      case 'switch': return 'Switch Campaign';
+      case 'pause': return 'Pause Outreach';
+      case 'escalate': return 'Escalate to Sales';
+      case 'exit': return 'Exit — Deal Conflict';
+      case 'monitor': return 'Monitor (Signal Rising)';
+      default: return 'Awaiting Evaluation';
+    }
+  };
+
+  const getDecisionColor = (decision?: string) => {
+    switch (decision) {
+      case 'continue': return '#10b981';
+      case 'switch': return '#3b82f6';
+      case 'pause': return '#f59e0b';
+      case 'escalate': return '#ef4444';
+      case 'exit': return '#ef4444';
+      case 'monitor': return '#f97316';
+      default: return '#64748b';
+    }
+  };
+
+  const getDecisionIcon = (decision?: string) => {
+    switch (decision) {
+      case 'continue': return <CheckCircle2 size={22} />;
+      case 'switch': return <ArrowRight size={22} />;
+      case 'pause': return <Clock size={22} />;
+      case 'escalate': return <AlertTriangle size={22} />;
+      case 'exit': return <ShieldAlert size={22} />;
+      case 'monitor': return <Activity size={22} />;
+      default: return <BarChart3 size={22} />;
+    }
+  };
+
+  const currentDecision = lastDecisionOutcome?.decision;
+  const decisionColor = getDecisionColor(currentDecision);
+
+  const getProductName = (id?: string | null) => {
+    if (id === 'product_a') return 'CloudSecure';
+    if (id === 'product_b') return 'DataFlow';
+    if (id === 'product_c') return 'FinanceOS';
+    return 'None';
+  };
+
+  const getStateName = (state: string) => {
+    switch (state) {
+      case 'ACTIVE_CURRENT': return 'Active';
+      case 'MONITORING': return 'Monitoring';
+      case 'EVALUATION_COOLDOWN': return '48h Cooldown';
+      case 'SWITCHING': return 'Switching';
+      case 'ESCALATED': return 'Escalated';
+      case 'PAUSED': return 'Paused';
+      default: return state;
+    }
+  };
+
+  // Derive the deal value for display
+  const totalDealAmount = displayAccount?.activeDeals?.reduce((sum, d) => sum + (d.amount || 0), 0) ?? 0;
+  const dealValue = totalDealAmount > 0
+    ? `$${(totalDealAmount / 1000).toFixed(0)}k`
+    : committeeData?.contactOutcomes?.some(c => c.decision === 'exit' || c.actionTaken === 'EXIT_SUPPRESSED')
+    ? '$120k'
+    : null;
+
   return (
     <div>
       <Header
@@ -378,688 +443,372 @@ export default function Home() {
         onToggleListening={() => setIsListening(!isListening)}
       />
 
-      <main className="app-container">
-        {/* Live Background Ingestion Banner */}
+      <main className="app-container" style={{ maxWidth: 1100 }}>
+        {/* ========== LIVE WEBHOOK TOAST ========== */}
         {liveWebhookToast && (
-          <div
-            style={{
-              background: 'rgba(16, 185, 129, 0.12)',
-              border: '1px solid rgba(16, 185, 129, 0.4)',
-              borderRadius: '8px',
-              padding: '10px 16px',
-              marginBottom: '16px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              animation: 'pulse 2s infinite',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
-              <span style={{ fontSize: '0.8rem', color: '#fff', fontWeight: 600 }}>
-                ⚡ Dashboard State Updated from {liveWebhookToast.source.toUpperCase()}:
-              </span>
-              <span style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 700 }}>
-                {liveWebhookToast.domain} ({liveWebhookToast.score} pts)
-              </span>
-              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                at {liveWebhookToast.timestamp}
-              </span>
-            </div>
-            <span className="pill pill-active font-mono" style={{ fontSize: '0.625rem' }}>
-              Evaluated via RevOps Engine • CRM Sync Checked
+          <div style={{
+            background: 'rgba(16, 185, 129, 0.12)',
+            border: '1px solid rgba(16, 185, 129, 0.4)',
+            borderRadius: 8,
+            padding: '10px 16px',
+            marginBottom: 16,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            animation: 'pulse 2s infinite',
+          }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
+            <span style={{ fontSize: '0.82rem', color: '#fff', fontWeight: 500 }}>
+              New signal from <strong>{liveWebhookToast.source.toUpperCase()}</strong>: {liveWebhookToast.domain} ({liveWebhookToast.score} pts)
+            </span>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginLeft: 'auto' }}>
+              {liveWebhookToast.timestamp}
             </span>
           </div>
         )}
-        {/* Buying committee evaluation card */}
-        <div
-          style={{
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border-hairline)',
-            borderRadius: 'var(--radius-md)',
-            padding: '14px 18px',
-            marginBottom: 18,
+
+        {/* ========== ERROR BANNER ========== */}
+        {error && (
+          <div style={{
+            padding: '10px 14px',
+            borderRadius: 'var(--radius-sm)',
+            background: 'rgba(239, 68, 68, 0.1)',
+            border: '1px solid rgba(239, 68, 68, 0.25)',
+            color: '#fca5a5',
+            fontSize: '0.8rem',
+            marginBottom: 16,
             display: 'flex',
-            flexDirection: 'column',
-            gap: 12,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 'var(--radius-sm)',
-                  background: 'rgba(56, 189, 248, 0.1)',
-                  border: '1px solid rgba(56, 189, 248, 0.25)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Globe size={16} color="#38bdf8" />
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}>
+            <span>{error}</span>
+            <button
+              onClick={() => setError(null)}
+              style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '1rem' }}
+            >✕</button>
+          </div>
+        )}
+
+        {/* ========== HERO: THE DECISION ========== */}
+        <div style={{
+          background: `linear-gradient(135deg, ${decisionColor}08 0%, var(--bg-surface) 100%)`,
+          border: `1px solid ${decisionColor}30`,
+          borderRadius: 12,
+          padding: '28px 32px',
+          marginBottom: 20,
+          position: 'relative',
+          overflow: 'hidden',
+        }}>
+          {/* Subtle accent line */}
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: 3,
+            background: `linear-gradient(90deg, ${decisionColor}, ${decisionColor}60, transparent)`,
+          }} />
+
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
+            {/* Left: Decision + Reasoning */}
+            <div style={{ flex: 1, minWidth: 280 }}>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600, marginBottom: 8 }}>
+                Engine Decision
               </div>
-              <div>
-                <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#fff', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  Buying Committee Evaluation
-                  <span className="pill pill-active font-mono" style={{ fontSize: '0.625rem' }}>
-                    Live Account Engine
-                  </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                <div style={{ color: decisionColor }}>
+                  {getDecisionIcon(currentDecision)}
                 </div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: 2 }}>
-                  Evaluate account domain intent across buying committee stakeholders, FSM guard rails, and HubSpot CRM batch updates.
+                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>
+                  {getDecisionLabel(currentDecision)}
                 </div>
+              </div>
+              <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6, maxWidth: 540 }}>
+                {lastDecisionOutcome?.reasoning || 'Run an evaluation below to see the engine\'s recommendation and reasoning.'}
               </div>
             </div>
 
-            {/* Live Webhook URL Snippet */}
-            <div
+            {/* Right: Key Metrics (4 cards) */}
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <div style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid var(--border-hairline)',
+                borderRadius: 8, padding: '10px 14px', minWidth: 115, textAlign: 'center',
+              }}>
+                <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 3 }}>Account</div>
+                <div style={{ fontSize: '0.92rem', fontWeight: 600, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {displayAccount?.name || 'TechCorp Inc'}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: '#38bdf8', marginTop: 2, fontFamily: 'monospace' }}>
+                  {displayAccount?.domain || 'techcorp.com'}
+                </div>
+              </div>
+
+              <div style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid var(--border-hairline)',
+                borderRadius: 8, padding: '10px 14px', minWidth: 125, textAlign: 'center',
+              }}>
+                <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 3 }}>Lead Contact</div>
+                <div style={{ fontSize: '0.92rem', fontWeight: 600, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {displayContact.name || 'Sarah Chen'}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {displayContact.role || 'VP of Engineering'}
+                </div>
+              </div>
+
+              <div style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid var(--border-hairline)',
+                borderRadius: 8, padding: '10px 14px', minWidth: 105, textAlign: 'center',
+              }}>
+                <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 3 }}>Journey State</div>
+                <div style={{ fontSize: '0.92rem', fontWeight: 600, color: decisionColor }}>
+                  {getStateName(prospect.fsmState)}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 2 }}>
+                  {getProductName(displayContact.currentCampaign)}
+                </div>
+              </div>
+
+              {dealValue && (
+                <div style={{
+                  background: 'rgba(239, 68, 68, 0.06)',
+                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                  borderRadius: 8, padding: '10px 14px', minWidth: 110, textAlign: 'center',
+                }}>
+                  <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 3 }}>Deal Protected</div>
+                  <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f87171' }}>
+                    {dealValue}
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: '#f87171', marginTop: 2 }}>
+                    Active Deal
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* ========== EVALUATION BAR ========== */}
+        <div style={{
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border-hairline)',
+          borderRadius: 10,
+          padding: '16px 20px',
+          marginBottom: 20,
+        }}>
+          <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#fff', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Globe size={15} color="#38bdf8" />
+              <span>Evaluate Account Buying Committee</span>
+            </div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+              Active Target: <span style={{ color: '#38bdf8', fontFamily: 'monospace' }}>{displayAccount?.domain || 'techcorp.com'}</span> ({displayAccount?.name || 'TechCorp Inc'})
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <input
+              id="domain-input"
+              name="domain"
+              type="text"
+              value={domainInput}
+              onChange={(e) => setDomainInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !isLoading) {
+                  handleEvaluateCommittee(domainInput);
+                }
+              }}
+              autoComplete="off"
+              spellCheck={false}
+              placeholder="Enter a company domain (e.g. stripe.com)"
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
+                flex: 1,
                 background: 'var(--bg-inset)',
                 border: '1px solid var(--border-hairline)',
-                borderRadius: 'var(--radius-sm)',
-                padding: '4px 10px',
-                fontSize: '0.7rem',
+                borderRadius: 6,
+                padding: '9px 14px',
+                color: '#fff',
+                fontSize: '0.85rem',
+                outline: 'none',
+                minWidth: 200,
               }}
+            />
+            <button
+              type="button"
+              onClick={() => handleEvaluateCommittee(domainInput)}
+              disabled={isLoading}
+              className="btn btn-primary"
+              style={{ padding: '9px 20px', fontSize: '0.85rem', whiteSpace: 'nowrap' }}
             >
-              <span style={{ color: 'var(--accent-lime)', fontWeight: 600 }}>POST</span>
-              <code style={{ color: '#e2e8f0', fontFamily: 'monospace' }}>/api/engine/webhook</code>
+              {isEvaluatingDomain ? (
+                <>
+                  <Loader2 size={14} className="animate-spin" />
+                  Evaluating...
+                </>
+              ) : (
+                <>
+                  <Play size={14} />
+                  Evaluate
+                </>
+              )}
+            </button>
+          </div>
+          {/* Quick-pick domains */}
+          <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+            {['techcorp.com', 'snowflake.com', 'stripe.com'].map((d) => (
               <button
+                key={d}
                 type="button"
-                onClick={() => {
-                  if (typeof window !== 'undefined') {
-                    navigator.clipboard.writeText(`${window.location.origin}/api/engine/webhook`);
-                    setCopiedWebhook(true);
-                    setTimeout(() => setCopiedWebhook(false), 2500);
-                  }
-                }}
-                className="btn btn-outline"
-                style={{ padding: '2px 8px', fontSize: '0.65rem', height: 22 }}
-                title="Copy webhook URL for Bombora / 6sense"
+                onClick={() => { setDomainInput(d); handleEvaluateCommittee(d); }}
+                disabled={isLoading}
+                className={`btn btn-secondary ${isEvaluatingDomain && evaluatingDomainName === d ? 'running-shimmer' : ''}`}
+                style={{ padding: '5px 12px', fontSize: '0.75rem' }}
               >
-                {copiedWebhook ? 'Copied!' : 'Copy Webhook'}
+                {isEvaluatingDomain && evaluatingDomainName === d ? (
+                  <><Loader2 size={11} className="animate-spin" /> Evaluating...</>
+                ) : d}
               </button>
-            </div>
+            ))}
+            <button
+              type="button"
+              onClick={handleAdvanceTimer}
+              disabled={isLoading}
+              className={`btn btn-secondary ${isAdvancingTimer ? 'running-shimmer' : ''}`}
+              style={{ padding: '5px 12px', fontSize: '0.75rem' }}
+            >
+              {isAdvancingTimer ? (
+                <><Loader2 size={11} className="animate-spin" /> Advancing...</>
+              ) : (
+                <><Clock size={11} /> Skip 48h Cooldown</>
+              )}
+            </button>
           </div>
 
-          {/* Integration Status Sub-Bar */}
-          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, fontSize: '0.675rem', paddingTop: 4, borderTop: '1px solid var(--border-hairline)' }}>
-            <span style={{ color: 'var(--text-muted)' }}>Integration capabilities:</span>
-            <span className="pill pill-active font-mono" style={{ fontSize: '0.625rem' }}>
-              ✓ Signal corroboration (status shown per result)
-            </span>
-            <span className="pill pill-active font-mono" style={{ fontSize: '0.625rem' }}>
-              ✓ HubSpot REST read/write (requires credentials)
-            </span>
-            <span className="pill pill-active font-mono" style={{ fontSize: '0.625rem' }}>
-              ✓ Bounded webhook agent loop (separate signed endpoint)
-            </span>
-            <span className="pill pill-active font-mono" style={{ fontSize: '0.625rem' }}>
-              ✓ Deterministic FSM + optional TypeSafe Jev decisions
-            </span>
-          </div>
-
-          {/* Input & Action Row */}
-          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 260 }}>
-              <input
-                id="domain-input"
-                name="domain"
-                type="text"
-                value={domainInput}
-                onChange={(e) => setDomainInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !isLoading) {
-                    handleEvaluateCommittee(domainInput);
-                  }
-                }}
-                autoComplete="off"
-                spellCheck={false}
-                placeholder="Enter domain (e.g. stripe.com, snowflake.com)"
-                style={{
-                  flex: 1,
-                  background: 'var(--bg-inset)',
-                  border: '1px solid var(--border-hairline)',
-                  borderRadius: 'var(--radius-sm)',
-                  padding: '7px 12px',
-                  color: '#fff',
-                  fontSize: '0.8rem',
-                  outline: 'none',
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => handleEvaluateCommittee(domainInput)}
-                disabled={isLoading}
-                className="btn btn-primary"
-                style={{ padding: '7px 16px', fontSize: '0.78rem', whiteSpace: 'nowrap' }}
-              >
-                {isEvaluatingDomain ? (
-                  <>
-                    <Activity size={12} className="animate-spin" />
-                    Evaluating {evaluatingDomainName || domainInput || 'domain'}...
-                  </>
-                ) : (
-                  <>
-                    <Play size={12} className={isLoading ? 'animate-spin' : ''} />
-                    Evaluate Committee
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Quick 1-Click Action Buttons */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-              <button
-                type="button"
-                onClick={() => {
-                  setDomainInput('techcorp.com');
-                  handleEvaluateCommittee('techcorp.com');
-                }}
-                disabled={isLoading}
-                className={`btn btn-secondary ${isEvaluatingDomain && evaluatingDomainName === 'techcorp.com' ? 'running-shimmer' : ''}`}
-                style={{ padding: '6px 10px', fontSize: '0.7rem' }}
-                title="Simulate CloudSecure 88 pts surge on techcorp.com with live digital footprint corroboration"
-              >
-                {isEvaluatingDomain && evaluatingDomainName === 'techcorp.com' ? (
-                  <>
-                    <Loader2 size={11} className="animate-spin" style={{ marginRight: 5 }} />
-                    Evaluating techcorp.com...
-                  </>
-                ) : (
-                  'Evaluate techcorp.com'
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setDomainInput('snowflake.com');
-                  handleEvaluateCommittee('snowflake.com');
-                }}
-                disabled={isLoading}
-                className={`btn btn-secondary ${isEvaluatingDomain && evaluatingDomainName === 'snowflake.com' ? 'running-shimmer' : ''}`}
-                style={{ padding: '6px 10px', fontSize: '0.7rem' }}
-                title="Evaluate Snowflake Inc. cross-BU conflict"
-              >
-                {isEvaluatingDomain && evaluatingDomainName === 'snowflake.com' ? (
-                  <>
-                    <Loader2 size={11} className="animate-spin" style={{ marginRight: 5 }} />
-                    Evaluating snowflake.com...
-                  </>
-                ) : (
-                  'Evaluate snowflake.com'
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setDomainInput('stripe.com');
-                  handleEvaluateCommittee('stripe.com');
-                }}
-                disabled={isLoading}
-                className={`btn btn-secondary ${isEvaluatingDomain && evaluatingDomainName === 'stripe.com' ? 'running-shimmer' : ''}`}
-                style={{ padding: '6px 10px', fontSize: '0.7rem' }}
-                title="Evaluate Stripe Inc. fintech buying committee"
-              >
-                {isEvaluatingDomain && evaluatingDomainName === 'stripe.com' ? (
-                  <>
-                    <Loader2 size={11} className="animate-spin" style={{ marginRight: 5 }} />
-                    Evaluating stripe.com...
-                  </>
-                ) : (
-                  'Evaluate stripe.com'
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={handleAdvanceTimer}
-                disabled={isLoading}
-                className={`btn btn-secondary ${isAdvancingTimer ? 'running-shimmer' : ''}`}
-                style={{ padding: '6px 10px', fontSize: '0.7rem' }}
-                title="Fast forward 48 hours for cooldown expiry cron evaluation"
-              >
-                {isAdvancingTimer ? (
-                  <>
-                    <Loader2 size={11} className="animate-spin" style={{ marginRight: 5 }} />
-                    Advancing 48h (Cron)...
-                  </>
-                ) : (
-                  'Advance 48h Cooldown (Cron)'
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Live Loading Progress State with 4-Stage Agent Pipeline Ribbon */}
+          {/* Loading Progress */}
           {(isEvaluatingDomain || isLoading) && (
-            <div
-              style={{
-                marginTop: 4,
-                padding: '10px 14px',
-                borderRadius: 'var(--radius-sm)',
-                background: 'rgba(56, 189, 248, 0.08)',
-                border: '1px solid rgba(56, 189, 248, 0.35)',
-                color: '#38bdf8',
-                fontSize: '0.74rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 8,
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Activity size={14} className="animate-spin" color="#38bdf8" />
-                  <span>
-                    <strong style={{ color: '#fff' }}>
-                      {runningScenarioId
-                        ? `⚡ Executing Scenario: ${runningScenarioId.replace(/_/g, ' ').toUpperCase()}`
-                        : isEvaluatingDomain
-                        ? `⚡ Evaluating Account Domain: ${evaluatingDomainName || domainInput || 'domain'}`
-                        : '⚡ RevOps Decision Engine Cycle In Flight...'}
-                    </strong>
-                  </span>
-                </div>
-                <span className="pill pill-active font-mono" style={{ fontSize: '0.625rem', padding: '1px 6px' }}>
-                  Multi-Stage Evaluation Pipeline
-                </span>
-              </div>
-
-              {/* 4-Stage Agent Pipeline Ribbon */}
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(4, 1fr)',
-                  gap: 8,
-                  fontSize: '0.68rem',
-                }}
-              >
-                <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '6px 8px', borderRadius: 4, border: '1px solid rgba(56, 189, 248, 0.2)' }}>
-                  <div style={{ color: 'var(--text-muted)', fontSize: '0.58rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Stage 1</div>
-                  <div style={{ fontWeight: 600, color: '#fff' }}>14d Signal Decay</div>
-                </div>
-                <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '6px 8px', borderRadius: 4, border: '1px solid rgba(56, 189, 248, 0.2)' }}>
-                  <div style={{ color: 'var(--text-muted)', fontSize: '0.58rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Stage 2</div>
-                  <div style={{ fontWeight: 600, color: '#fff' }}>Dual-Gate (Δ≥25, Floor≥50)</div>
-                </div>
-                <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '6px 8px', borderRadius: 4, border: '1px solid rgba(56, 189, 248, 0.2)' }}>
-                  <div style={{ color: 'var(--text-muted)', fontSize: '0.58rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Stage 3</div>
-                  <div style={{ fontWeight: 600, color: '#fff' }}>TypeSafe Jev (System One)</div>
-                </div>
-                <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '6px 8px', borderRadius: 4, border: '1px solid rgba(56, 189, 248, 0.2)' }}>
-                  <div style={{ color: 'var(--text-muted)', fontSize: '0.58rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Stage 4</div>
-                  <div style={{ fontWeight: 600, color: '#fff' }}>HubSpot v3 CRM Sync</div>
-                </div>
-              </div>
+            <div style={{
+              marginTop: 10,
+              padding: '8px 12px',
+              borderRadius: 6,
+              background: 'rgba(56, 189, 248, 0.06)',
+              border: '1px solid rgba(56, 189, 248, 0.2)',
+              color: '#38bdf8',
+              fontSize: '0.78rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}>
+              <Loader2 size={14} className="animate-spin" />
+              <span>
+                {runningScenarioId
+                  ? `Running scenario: ${runningScenarioId.replace(/_/g, ' ')}`
+                  : isEvaluatingDomain
+                  ? `Evaluating ${evaluatingDomainName || domainInput}...`
+                  : 'Processing...'}
+              </span>
             </div>
           )}
 
-          {/* Execution Success Banner */}
+          {/* Success Banner */}
           {successBanner && (
-            <div
-              style={{
-                marginTop: 2,
-                padding: '8px 14px',
-                borderRadius: 'var(--radius-sm)',
-                background: 'rgba(16, 185, 129, 0.12)',
-                border: '1px solid rgba(16, 185, 129, 0.35)',
-                color: '#34d399',
-                fontSize: '0.75rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 12,
-              }}
-            >
+            <div style={{
+              marginTop: 8,
+              padding: '8px 12px',
+              borderRadius: 6,
+              background: 'rgba(16, 185, 129, 0.08)',
+              border: '1px solid rgba(16, 185, 129, 0.25)',
+              color: '#34d399',
+              fontSize: '0.78rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 8,
+            }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <CheckCircle2 size={15} color="#34d399" />
+                <CheckCircle2 size={14} />
                 <span>
-                  <strong>Agent {successBanner.agentStatus} for {successBanner.domain} ({successBanner.executionMode}, {successBanner.latencyMs}ms):</strong> Web check {successBanner.corroborationStatus} ({successBanner.corroborationScore}%, {successBanner.corroborationSource}) | {successBanner.crmWriteStatus} | {successBanner.taskStatus}
+                  <strong>{successBanner.domain}</strong> evaluated in {successBanner.latencyMs}ms — {successBanner.crmWriteStatus}
                 </span>
               </div>
               <button
                 type="button"
                 onClick={() => setSuccessBanner(null)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#34d399',
-                  cursor: 'pointer',
-                  fontSize: '0.8rem',
-                  padding: '0 4px',
-                }}
-              >
-                ✕
-              </button>
+                style={{ background: 'transparent', border: 'none', color: '#34d399', cursor: 'pointer' }}
+              >✕</button>
             </div>
           )}
         </div>
 
-        {/* Downstream Learning Feedback Loop — Observability & Auto-Tuning */}
-        <div
-          style={{
+        {/* ========== SCORE OVERVIEW (compact 4-column) ========== */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+          gap: 10,
+          marginBottom: 20,
+        }}>
+          {[
+            { label: 'CloudSecure', value: Math.round(scores['product_a'] ?? 0), id: 'product_a' },
+            { label: 'DataFlow', value: Math.round(scores['product_b'] ?? 0), id: 'product_b' },
+            { label: 'FinanceOS', value: Math.round(scores['product_c'] ?? 0), id: 'product_c' },
+            { label: 'Score Gap', value: delta, id: 'delta' },
+          ].map((item) => {
+            const isActive = displayContact.currentCampaign === item.id;
+            const isDelta = item.id === 'delta';
+            return (
+              <div key={item.id} style={{
+                background: isActive ? 'rgba(16, 185, 129, 0.06)' : 'var(--bg-surface)',
+                border: `1px solid ${isActive ? 'rgba(16, 185, 129, 0.25)' : 'var(--border-hairline)'}`,
+                borderRadius: 8,
+                padding: '12px 14px',
+                textAlign: 'center',
+              }}>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 4 }}>
+                  {item.label} {isActive && '★'}
+                </div>
+                <div className="font-mono" style={{
+                  fontSize: isDelta ? '1.1rem' : '1.3rem',
+                  fontWeight: 700,
+                  color: isDelta
+                    ? (item.value >= 25 ? '#34d399' : '#fff')
+                    : isActive ? '#34d399' : '#fff',
+                }}>
+                  {isDelta ? (item.value >= 0 ? `+${item.value.toFixed(1)}` : item.value.toFixed(1)) : item.value}
+                </div>
+                {isDelta && (
+                  <div style={{ fontSize: '0.68rem', color: item.value >= 25 ? '#34d399' : 'var(--text-muted)', marginTop: 2 }}>
+                    {item.value >= 25 ? 'Threshold met (≥25)' : 'Below threshold'}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ========== TEST SCENARIOS (collapsed by default) ========== */}
+        <details style={{ marginBottom: 16 }}>
+          <summary style={{
+            cursor: 'pointer',
             background: 'var(--bg-surface)',
             border: '1px solid var(--border-hairline)',
-            borderRadius: 'var(--radius-md)',
-            padding: '12px 18px',
-            marginBottom: 18,
+            borderRadius: 8,
+            padding: '12px 16px',
+            fontSize: '0.82rem',
+            fontWeight: 600,
+            color: '#fff',
             display: 'flex',
-            flexDirection: 'column',
-            gap: 10,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <TrendingUp size={16} color="var(--accent-lime)" />
-              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff' }}>
-                Source Weight Snapshot &amp; Outcome Ingestion
-              </span>
-              <span className="pill pill-active font-mono" style={{ fontSize: '0.625rem' }}>
-                Signed Provider Events
-              </span>
-            </div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-              Live weight matrix across signal channels. Downstream outcomes dynamically calibrate channel weights via signed HMAC webhooks (/api/engine/feedback).
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-            {/* Live Weight Indicators */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', fontSize: '0.72rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ color: 'var(--text-muted)' }}>1st-Party Direct:</span>
-                <span className="font-mono" style={{ color: '#fff', fontWeight: 600 }}>
-                  {(data.sourceWeights?.['1st_party_direct'] ?? 1.0).toFixed(2)}
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ color: 'var(--text-muted)' }}>1st-Party Passive:</span>
-                <span className="font-mono" style={{ color: '#fff', fontWeight: 600 }}>
-                  {(data.sourceWeights?.['1st_party_passive'] ?? 0.7).toFixed(2)}
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ color: 'var(--text-muted)' }}>2nd-Party Reviews:</span>
-                <span className="font-mono" style={{ color: '#fff', fontWeight: 600 }}>
-                  {(data.sourceWeights?.['2nd_party'] ?? 0.7).toFixed(2)}
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(52, 211, 153, 0.1)', padding: '2px 8px', borderRadius: 4, border: '1px solid rgba(52, 211, 153, 0.3)' }}>
-                <span style={{ color: 'var(--accent-lime)', fontWeight: 600 }}>3rd-Party Intent (Bombora):</span>
-                <span className="font-mono" style={{ color: 'var(--accent-lime)', fontWeight: 700, fontSize: '0.8rem' }}>
-                  {(data.sourceWeights?.['3rd_party'] ?? 0.5).toFixed(2)}
-                </span>
-                <span className="pill pill-active font-mono" style={{ fontSize: '0.55rem', padding: '1px 4px' }}>
-                  Dashboard Snapshot
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ color: 'var(--text-muted)' }}>Firmographic:</span>
-                <span className="font-mono" style={{ color: '#fff', fontWeight: 600 }}>
-                  {(data.sourceWeights?.['firmographic'] ?? 0.3).toFixed(2)}
-                </span>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
-                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  Trigger Downstream Conversion Outcomes (Feedback Loop):
-                </span>
-                <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
-                  External Webhook: <code>POST /api/engine/feedback</code> (HMAC Signed)
-                </span>
-              </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                <button
-                  type="button"
-                  className={`btn btn-secondary ${runningFeedbackType === 'meeting_booked' ? 'running-shimmer' : ''}`}
-                  disabled={isLoading}
-                  onClick={() => handleTriggerFeedback('meeting_booked', '+0.08')}
-                  style={{ fontSize: '0.72rem', padding: '4px 10px', color: 'var(--accent-lime)', borderColor: 'rgba(52, 211, 153, 0.4)' }}
-                >
-                  {runningFeedbackType === 'meeting_booked' ? (
-                    <>
-                      <Loader2 size={11} className="animate-spin" style={{ marginRight: 5 }} />
-                      Recalibrating (+0.08)...
-                    </>
-                  ) : (
-                    '+ Meeting Booked (+0.08)'
-                  )}
-                </button>
-                <button
-                  type="button"
-                  className={`btn btn-secondary ${runningFeedbackType === 'email_reply' ? 'running-shimmer' : ''}`}
-                  disabled={isLoading}
-                  onClick={() => handleTriggerFeedback('email_reply', '+0.05')}
-                  style={{ fontSize: '0.72rem', padding: '4px 10px', color: 'var(--accent-cyan)', borderColor: 'rgba(34, 211, 238, 0.4)' }}
-                >
-                  {runningFeedbackType === 'email_reply' ? (
-                    <>
-                      <Loader2 size={11} className="animate-spin" style={{ marginRight: 5 }} />
-                      Recalibrating (+0.05)...
-                    </>
-                  ) : (
-                    '+ Email Reply (+0.05)'
-                  )}
-                </button>
-                <button
-                  type="button"
-                  className={`btn btn-secondary ${runningFeedbackType === 'deal_lost' ? 'running-shimmer' : ''}`}
-                  disabled={isLoading}
-                  onClick={() => handleTriggerFeedback('deal_lost', '-0.05')}
-                  style={{ fontSize: '0.72rem', padding: '4px 10px', color: 'var(--accent-amber)', borderColor: 'rgba(251, 191, 36, 0.4)' }}
-                >
-                  {runningFeedbackType === 'deal_lost' ? (
-                    <>
-                      <Loader2 size={11} className="animate-spin" style={{ marginRight: 5 }} />
-                      Recalibrating (-0.05)...
-                    </>
-                  ) : (
-                    '- Deal Lost (-0.05)'
-                  )}
-                </button>
-                <button
-                  type="button"
-                  className={`btn btn-secondary ${runningFeedbackType === 'unsubscribed' ? 'running-shimmer' : ''}`}
-                  disabled={isLoading}
-                  onClick={() => handleTriggerFeedback('unsubscribed', '-0.08')}
-                  style={{ fontSize: '0.72rem', padding: '4px 10px', color: 'var(--accent-rose)', borderColor: 'rgba(244, 63, 94, 0.4)' }}
-                >
-                  {runningFeedbackType === 'unsubscribed' ? (
-                    <>
-                      <Loader2 size={11} className="animate-spin" style={{ marginRight: 5 }} />
-                      Recalibrating (-0.08)...
-                    </>
-                  ) : (
-                    '- Unsubscribed (-0.08)'
-                  )}
-                </button>
-              </div>
-              {runningFeedbackType && (
-                <div style={{
-                  background: 'rgba(56, 189, 248, 0.1)',
-                  border: '1px solid rgba(56, 189, 248, 0.35)',
-                  color: '#38bdf8',
-                  padding: '6px 10px',
-                  borderRadius: 'var(--radius-sm)',
-                  fontSize: '0.74rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                }}>
-                  <Loader2 size={12} className="animate-spin" />
-                  <span>
-                    <strong>⚡ Recalibrating Weights:</strong> Applying bounded outcome adjustment for <code>{runningFeedbackType}</code>...
-                  </span>
-                </div>
-              )}
-              {feedbackNotice && (
-                <div style={{
-                  background: 'rgba(52, 211, 153, 0.1)',
-                  border: '1px solid rgba(52, 211, 153, 0.3)',
-                  color: 'var(--accent-lime)',
-                  padding: '6px 10px',
-                  borderRadius: 'var(--radius-sm)',
-                  fontSize: '0.75rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6
-                }}>
-                  <span style={{ fontSize: '0.9rem' }}>✓</span> {feedbackNotice}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Top Minimalist KPI Ribbon */}
-        <div className="kpi-ribbon" style={{ marginBottom: 18 }}>
-          <div
-            style={{
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border-hairline)',
-              borderRadius: 'var(--radius-md)',
-              padding: '10px 14px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 10,
-            }}
-          >
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: '0.675rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                Active Prospect
-              </div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {committeeData?.account?.name || displayAccount?.name || '— Awaiting First Domain Evaluation —'}
-              </div>
-            </div>
-            <span className="pill pill-neutral font-mono" style={{ flexShrink: 0 }}>{committeeData?.account?.tier ? `Tier ${committeeData.account.tier}` : displayAccount?.tier ? `Tier ${displayAccount.tier}` : 'Idle'}</span>
-          </div>
-
-          <div
-            style={{
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border-hairline)',
-              borderRadius: 'var(--radius-md)',
-              padding: '10px 14px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 10,
-            }}
-          >
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: '0.675rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                Current Journey
-              </div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {!hasEvaluated
-                  ? '— Idle —'
-                  : displayContact.currentCampaign === 'product_a'
-                  ? 'CloudSecure'
-                  : displayContact.currentCampaign === 'product_c'
-                  ? 'FinanceOS'
-                  : 'DataFlow'}
-              </div>
-            </div>
-            <span className="pill pill-neutral font-mono" style={{ flexShrink: 0 }}>{displayAccount?.ownerBU || (hasEvaluated ? 'BU_Analytics' : 'Standby')}</span>
-          </div>
-
-          <div
-            style={{
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border-hairline)',
-              borderRadius: 'var(--radius-md)',
-              padding: '10px 14px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 10,
-            }}
-          >
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: '0.675rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                Hysteresis Gap
-              </div>
-              <div className="font-mono" style={{ fontSize: '0.9rem', fontWeight: 700, color: delta >= 25 ? '#34d399' : '#fff', marginTop: 2, whiteSpace: 'nowrap' }}>
-                Δ = {delta >= 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1)} pts
-              </div>
-            </div>
-            <span className={`pill ${delta >= 25 ? 'pill-active' : 'pill-neutral'}`} style={{ flexShrink: 0 }}>
-              {delta >= 25 ? 'Threshold Met' : 'Normal'}
-            </span>
-          </div>
-
-          <div
-            style={{
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border-hairline)',
-              borderRadius: 'var(--radius-md)',
-              padding: '10px 14px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 10,
-            }}
-          >
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: '0.675rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                Safety Boundaries
-              </div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                Dual-Gate &amp; Fatigue
-              </div>
-            </div>
-            <span className="pill pill-active font-mono" style={{ flexShrink: 0 }}>Enforced</span>
-          </div>
-        </div>
-
-        {error && (
-          <div
-            style={{
-              padding: '10px 14px',
-              borderRadius: 'var(--radius-sm)',
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.25)',
-              color: '#fca5a5',
-              fontSize: '0.78rem',
-              marginBottom: 18,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <span>{error}</span>
-            <button
-              onClick={() => setError(null)}
-              style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer' }}
-            >
-              ✕
-            </button>
-          </div>
-        )}
-
-        {/* Upper 3-Column Grid */}
-        <div className="top-grid">
-          <div>
-            <ProspectOverview prospect={synchronizedProspect} scores={scores} delta={delta} />
-          </div>
-
-          <div>
-            <StateMachineVisualizer
-              currentState={prospect.fsmState}
-              previousState={prospect.previousState}
-              stateEnteredAt={prospect.stateEnteredAt}
-              reasoning={lastDecisionOutcome?.reasoning}
-            />
-          </div>
-
-          <div className="top-grid-right">
+            alignItems: 'center',
+            gap: 8,
+            listStyle: 'none',
+          }}>
+            <Zap size={14} color="#fbbf24" />
+            Test Scenarios — Run pre-built evaluation cases
+            <ChevronDown size={14} style={{ marginLeft: 'auto', color: 'var(--text-muted)' }} />
+          </summary>
+          <div style={{
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-hairline)',
+            borderTop: 'none',
+            borderRadius: '0 0 8px 8px',
+            padding: 16,
+          }}>
             <ScenarioDispatcher
               onDispatchScenario={handleDispatchScenario}
               onAdvanceTimer={handleAdvanceTimer}
@@ -1073,115 +822,288 @@ export default function Home() {
               isEvaluatingCommittee={isEvaluatingDomain}
             />
           </div>
-        </div>
+        </details>
 
-        {/* Lower Tabbed Inspector Section */}
-        <div style={{ marginTop: 20 }}>
-          <div className="panel">
-            {/* Header with Navigation Tabs */}
-            <div className="panel-header" style={{ padding: '8px 14px' }}>
-              <div className="tab-nav">
-                <button
-                  className={`tab-nav-btn ${activeTab === 'decision' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('decision')}
-                >
-                  <Calculator size={13} />
-                  Decision &amp; Guard Analysis
-                </button>
-                <button
-                  className={`tab-nav-btn ${activeTab === 'committee' ? 'active' : ''}`}
-                  onClick={() => {
-                    setActiveTab('committee');
-                    if (!committeeData && !data.lastBuyingCommitteeResolution && domainInput.trim()) {
-                      handleEvaluateCommittee(domainInput);
-                    }
-                  }}
-                >
-                  <Users size={13} color={activeTab === 'committee' ? '#38bdf8' : 'currentColor'} />
-                  Buying Committee Resolution
-                  <span className="pill pill-neutral font-mono" style={{ fontSize: '0.625rem', padding: '1px 5px' }}>
-                    {committeeData?.totalContactsEvaluated ?? data.lastBuyingCommitteeResolution?.totalContactsEvaluated ?? '—'}
+        {/* ========== FEEDBACK LOOP (collapsed by default) ========== */}
+        <details style={{ marginBottom: 16 }}>
+          <summary style={{
+            cursor: 'pointer',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-hairline)',
+            borderRadius: 8,
+            padding: '12px 16px',
+            fontSize: '0.82rem',
+            fontWeight: 600,
+            color: '#fff',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            listStyle: 'none',
+          }}>
+            <TrendingUp size={14} color="var(--accent-lime)" />
+            Downstream Feedback — See how outcomes recalibrate signal weights
+            <ChevronDown size={14} style={{ marginLeft: 'auto', color: 'var(--text-muted)' }} />
+          </summary>
+          <div style={{
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-hairline)',
+            borderTop: 'none',
+            borderRadius: '0 0 8px 8px',
+            padding: 16,
+          }}>
+            {/* Weight Snapshot */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', fontSize: '0.78rem', marginBottom: 14 }}>
+              <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Current Signal Weights:</span>
+              {[
+                { label: '1st-Party', key: '1st_party_direct', fallback: 1.0 },
+                { label: 'Passive', key: '1st_party_passive', fallback: 0.7 },
+                { label: 'Reviews', key: '2nd_party', fallback: 0.7 },
+                { label: 'Bombora', key: '3rd_party', fallback: 0.5 },
+                { label: 'Firmographic', key: 'firmographic', fallback: 0.3 },
+              ].map((w) => (
+                <span key={w.key} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ color: 'var(--text-muted)' }}>{w.label}:</span>
+                  <span className="font-mono" style={{ color: '#fff', fontWeight: 600 }}>
+                    {((data.sourceWeights as Record<string, number> | undefined)?.[w.key] ?? w.fallback).toFixed(2)}
                   </span>
-                </button>
-                <button
-                  className={`tab-nav-btn ${activeTab === 'briefing' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('briefing')}
-                >
-                  <ShieldAlert size={13} color={isEscalated ? '#f87171' : 'currentColor'} />
-                  Sales Executive Briefing
-                  {isEscalated && <span className="pill pill-critical" style={{ fontSize: '0.6rem', padding: '1px 5px' }}>Escalated</span>}
-                </button>
-                <button
-                  className={`tab-nav-btn ${activeTab === 'crm' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('crm')}
-                >
-                  <Database size={13} />
-                  HubSpot CRM Sync Payloads
-                </button>
-                <button
-                  className={`tab-nav-btn ${activeTab === 'audit' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('audit')}
-                >
-                  <History size={13} />
-                  System Audit Ledger
-                  <span className="pill pill-neutral font-mono" style={{ fontSize: '0.625rem', padding: '1px 5px' }}>
-                    {auditLedger.length}
-                  </span>
-                </button>
-              </div>
-
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                {activeTab === 'decision' && 'Deterministic FSM & Calibrated Jev Engine'}
-                {activeTab === 'committee' && `Parallel Multi-Contact Resolution${committeeData?.domain ? ` (${committeeData.domain})` : ''}`}
-                {activeTab === 'briefing' && 'Cross-Sell Context & Account Memo'}
-                {activeTab === 'crm' && 'Idempotent REST API v3 Payloads'}
-                {activeTab === 'audit' && 'Immutable Chronological Event Log'}
-              </div>
+                </span>
+              ))}
             </div>
 
-            {/* Tab Body */}
-            <div className="panel-body">
-              {activeTab === 'decision' && (
-                <DecisionBreakdown
-                  outcome={lastDecisionOutcome}
-                  currentCampaign={prospect.contact.currentCampaign}
-                  prospect={prospect}
-                  jevDetails={lastJevDetails}
-                />
-              )}
-              {activeTab === 'committee' && (
-                <BuyingCommitteeViewer
-                  committeeData={committeeData || data.lastBuyingCommitteeResolution}
-                  consolidatedTaskResult={data.lastConsolidatedTaskResult}
-                  onRefresh={() => handleEvaluateCommittee(domainInput)}
-                  isLoading={isLoading}
-                />
-              )}
-              {activeTab === 'briefing' && (
-                <AiBriefingPanel
-                  prospect={synchronizedProspect}
-                  isEscalated={isEscalated}
-                  briefing={data.lastBriefing}
-                  isLoading={isLoading}
-                  onTriggerEscalation={() => handleDispatchScenario('scenario_4_enterprise_escalation')}
-                />
-              )}
-              {activeTab === 'crm' && (
-                <CrmPayloadViewer
-                  payload={lastSyncPayload}
-                  liveSyncResult={data?.lastLiveSyncResult}
-                  committeeResolution={committeeData || data?.lastBuyingCommitteeResolution}
-                  domain={domainInput || committeeData?.domain || synchronizedProspect.account.domain}
-                  isLoading={isLoading}
-                  onTriggerEvaluation={handleEvaluateCommittee}
-                />
-              )}
-              {activeTab === 'audit' && (
-                <AuditLog entries={auditLedger} />
-              )}
+            {/* Feedback Buttons */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {[
+                { type: 'meeting_booked' as const, label: '+ Meeting Booked', delta: '+0.08', color: 'var(--accent-lime)', borderColor: 'rgba(52, 211, 153, 0.4)' },
+                { type: 'email_reply' as const, label: '+ Email Reply', delta: '+0.05', color: '#22d3ee', borderColor: 'rgba(34, 211, 238, 0.4)' },
+                { type: 'deal_lost' as const, label: '− Deal Lost', delta: '-0.05', color: '#fbbf24', borderColor: 'rgba(251, 191, 36, 0.4)' },
+                { type: 'unsubscribed' as const, label: '− Unsubscribed', delta: '-0.08', color: '#f43f5e', borderColor: 'rgba(244, 63, 94, 0.4)' },
+              ].map((fb) => (
+                <button
+                  key={fb.type}
+                  type="button"
+                  className={`btn btn-secondary ${runningFeedbackType === fb.type ? 'running-shimmer' : ''}`}
+                  disabled={isLoading}
+                  onClick={() => handleTriggerFeedback(fb.type, fb.delta)}
+                  style={{ fontSize: '0.76rem', padding: '6px 12px', color: fb.color, borderColor: fb.borderColor }}
+                >
+                  {runningFeedbackType === fb.type ? (
+                    <><Loader2 size={11} className="animate-spin" /> Recalibrating...</>
+                  ) : (
+                    `${fb.label} (${fb.delta})`
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {/* Feedback notices */}
+            {feedbackNotice && (
+              <div style={{
+                marginTop: 10,
+                background: 'rgba(52, 211, 153, 0.08)',
+                border: '1px solid rgba(52, 211, 153, 0.25)',
+                color: 'var(--accent-lime)',
+                padding: '8px 12px',
+                borderRadius: 6,
+                fontSize: '0.78rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+              }}>
+                <CheckCircle2 size={13} /> {feedbackNotice}
+              </div>
+            )}
+
+            {/* Webhook info */}
+            <div style={{ marginTop: 12, fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+              Production webhook: <code style={{ color: '#e2e8f0' }}>POST /api/engine/feedback</code> (HMAC-SHA256 signed)
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    navigator.clipboard.writeText(`${window.location.origin}/api/engine/webhook`);
+                    setCopiedWebhook(true);
+                    setTimeout(() => setCopiedWebhook(false), 2500);
+                  }
+                }}
+                className="btn btn-outline"
+                style={{ padding: '2px 8px', fontSize: '0.65rem', height: 22, marginLeft: 8 }}
+              >
+                {copiedWebhook ? 'Copied!' : 'Copy URL'}
+              </button>
             </div>
           </div>
-        </div>
+        </details>
+
+        {/* ========== ACCOUNT & PROSPECT DETAIL (collapsed by default) ========== */}
+        <details style={{ marginBottom: 16 }}>
+          <summary style={{
+            cursor: 'pointer',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-hairline)',
+            borderRadius: 8,
+            padding: '12px 16px',
+            fontSize: '0.82rem',
+            fontWeight: 600,
+            color: '#fff',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            listStyle: 'none',
+          }}>
+            <Building2 size={14} color="#60a5fa" />
+            Account & Prospect Details
+            <span className="pill pill-neutral font-mono" style={{ fontSize: '0.65rem', marginLeft: 6 }}>
+              {displayAccount?.name || 'None'}
+            </span>
+            <ChevronDown size={14} style={{ marginLeft: 'auto', color: 'var(--text-muted)' }} />
+          </summary>
+          <div style={{
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-hairline)',
+            borderTop: 'none',
+            borderRadius: '0 0 8px 8px',
+            padding: 16,
+          }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <ProspectOverview prospect={synchronizedProspect} scores={scores} delta={delta} />
+              <StateMachineVisualizer
+                currentState={prospect.fsmState}
+                previousState={prospect.previousState}
+                stateEnteredAt={prospect.stateEnteredAt}
+                reasoning={lastDecisionOutcome?.reasoning}
+              />
+            </div>
+          </div>
+        </details>
+
+        {/* ========== DEEP ANALYSIS TABS (collapsed by default) ========== */}
+        <details style={{ marginBottom: 20 }}>
+          <summary style={{
+            cursor: 'pointer',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-hairline)',
+            borderRadius: 8,
+            padding: '12px 16px',
+            fontSize: '0.82rem',
+            fontWeight: 600,
+            color: '#fff',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            listStyle: 'none',
+          }}>
+            <Sliders size={14} color="#a78bfa" />
+            Deep Analysis — Decision logic, buying committee, CRM payloads, audit log
+            <span className="pill pill-neutral font-mono" style={{ fontSize: '0.65rem', marginLeft: 6 }}>
+              {auditLedger.length} events
+            </span>
+            <ChevronDown size={14} style={{ marginLeft: 'auto', color: 'var(--text-muted)' }} />
+          </summary>
+          <div style={{
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-hairline)',
+            borderTop: 'none',
+            borderRadius: '0 0 8px 8px',
+            padding: 0,
+          }}>
+            <div className="panel" style={{ border: 'none', borderRadius: 0 }}>
+              {/* Tab Navigation */}
+              <div className="panel-header" style={{ padding: '8px 14px' }}>
+                <div className="tab-nav">
+                  <button
+                    className={`tab-nav-btn ${activeTab === 'decision' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('decision')}
+                  >
+                    <Calculator size={13} />
+                    Decision Logic
+                  </button>
+                  <button
+                    className={`tab-nav-btn ${activeTab === 'committee' ? 'active' : ''}`}
+                    onClick={() => {
+                      setActiveTab('committee');
+                      if (!committeeData && !data.lastBuyingCommitteeResolution && domainInput.trim()) {
+                        handleEvaluateCommittee(domainInput);
+                      }
+                    }}
+                  >
+                    <Users size={13} color={activeTab === 'committee' ? '#38bdf8' : 'currentColor'} />
+                    Buying Committee
+                    <span className="pill pill-neutral font-mono" style={{ fontSize: '0.625rem', padding: '1px 5px' }}>
+                      {committeeData?.totalContactsEvaluated ?? data.lastBuyingCommitteeResolution?.totalContactsEvaluated ?? '—'}
+                    </span>
+                  </button>
+                  <button
+                    className={`tab-nav-btn ${activeTab === 'briefing' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('briefing')}
+                  >
+                    <ShieldAlert size={13} color={isEscalated ? '#f87171' : 'currentColor'} />
+                    Sales Briefing
+                    {isEscalated && <span className="pill pill-critical" style={{ fontSize: '0.6rem', padding: '1px 5px' }}>Escalated</span>}
+                  </button>
+                  <button
+                    className={`tab-nav-btn ${activeTab === 'crm' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('crm')}
+                  >
+                    <Database size={13} />
+                    CRM Sync
+                  </button>
+                  <button
+                    className={`tab-nav-btn ${activeTab === 'audit' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('audit')}
+                  >
+                    <History size={13} />
+                    Audit Log
+                    <span className="pill pill-neutral font-mono" style={{ fontSize: '0.625rem', padding: '1px 5px' }}>
+                      {auditLedger.length}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Tab Body */}
+              <div className="panel-body">
+                {activeTab === 'decision' && (
+                  <DecisionBreakdown
+                    outcome={lastDecisionOutcome}
+                    currentCampaign={prospect.contact.currentCampaign}
+                    prospect={prospect}
+                    jevDetails={lastJevDetails}
+                  />
+                )}
+                {activeTab === 'committee' && (
+                  <BuyingCommitteeViewer
+                    committeeData={committeeData || data.lastBuyingCommitteeResolution}
+                    consolidatedTaskResult={data.lastConsolidatedTaskResult}
+                    onRefresh={() => handleEvaluateCommittee(domainInput)}
+                    isLoading={isLoading}
+                  />
+                )}
+                {activeTab === 'briefing' && (
+                  <AiBriefingPanel
+                    prospect={synchronizedProspect}
+                    isEscalated={isEscalated}
+                    briefing={data.lastBriefing}
+                    isLoading={isLoading}
+                    onTriggerEscalation={() => handleDispatchScenario('scenario_4_enterprise_escalation')}
+                  />
+                )}
+                {activeTab === 'crm' && (
+                  <CrmPayloadViewer
+                    payload={lastSyncPayload}
+                    liveSyncResult={data?.lastLiveSyncResult}
+                    committeeResolution={committeeData || data?.lastBuyingCommitteeResolution}
+                    domain={domainInput || committeeData?.domain || synchronizedProspect.account.domain}
+                    isLoading={isLoading}
+                    onTriggerEvaluation={handleEvaluateCommittee}
+                  />
+                )}
+                {activeTab === 'audit' && (
+                  <AuditLog entries={auditLedger} />
+                )}
+              </div>
+            </div>
+          </div>
+        </details>
       </main>
 
       {/* Custom Signal Injection Modal */}
